@@ -167,6 +167,8 @@ it will also import the Player constructor directly:
     + [getAutopause](#getautopause-promiseboolean-unsupportederrorerror)
     + [setAutopause](#setautopauseautopause-boolean-promiseboolean-unsupportederrorerror)
     + [getBuffered](#getbuffered-promisearray-error)
+    + [getChapters](#getchapters-promisearray-error)
+    + [getCurrentChapter](#getcurrentchapter-promiseobject-error)
     + [getColor](#getcolor-promisestring-error)
     + [setColor](#setcolorcolor-string-promisestring-contrasterrortypeerrorerror)
     + [addCuePoint](#addcuepointtime-number-data-object-promisestring-unsupportederrorrangeerrorerror)
@@ -583,6 +585,39 @@ Get the buffered time ranges of the video.
 ```js
 player.getBuffered().then(function(buffered) {
     // buffered = an array of the buffered video time ranges.
+}).catch(function(error) {
+    // an error occurred
+});
+```
+
+### getChapters(): Promise&lt;array, Error&gt;
+
+Get an array of the chapters that are on the video.
+
+```js
+player.getChapters().then(function(chapters) {
+    // chapters = an array of chapters objects
+}).catch(function(error) {
+    // an error occurred
+});
+```
+Each chapters object looks like this:
+
+```js
+{
+    "startTime": 15,
+    "title": "Chapter Title",
+    "index": 1
+}
+```
+
+### getCurrentChapter(): Promise&lt;object, Error&gt;
+
+Get the currently active chapter.
+
+```js
+player.getCurrentChapter().then(function(chapter) {
+    // chapter = an chapter object
 }).catch(function(error) {
     // an error occurred
 });
