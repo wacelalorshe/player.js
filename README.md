@@ -207,6 +207,7 @@ it will also import the Player constructor directly:
     + [seeking](#seeking)
     + [seeked](#seeked)
     + [texttrackchange](#texttrackchange)
+    + [chapterchange](#chapterchange)
     + [cuechange](#cuechange)
     + [cuepoint](#cuepoint)
     + [volumechange](#volumechange)
@@ -1244,6 +1245,20 @@ will be null if text tracks are turned off.
     language: "en"
 }
 ```
+
+### chapterchange
+
+Triggered when the active chapter changes.
+
+```js
+{
+    startTime: 15,
+    title: "Chapter 1",
+    index: 1
+}
+```
+
+The `index` property of each chapter is the place it holds in the order of all the chapters. It starts at 1.
 
 ### cuechange
 
