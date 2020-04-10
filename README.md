@@ -614,11 +614,11 @@ Each chapters object looks like this:
 
 ### getCurrentChapter(): Promise&lt;object, Error&gt;
 
-Get the currently active chapter.
+Get the current chapter. A chapter is "current" when the `currentTime` of the video is equal to or after its `startTime` and before the `startTime` of the next chapter or the end of the video.
 
 ```js
 player.getCurrentChapter().then(function(chapter) {
-    // chapter = an chapter object
+    // chapter = a chapter object
 }).catch(function(error) {
     // an error occurred
 });
@@ -1248,7 +1248,7 @@ will be null if text tracks are turned off.
 
 ### chapterchange
 
-Triggered when the active chapter changes.
+Triggered when the current chapter changes.
 
 ```js
 {
