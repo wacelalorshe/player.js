@@ -164,6 +164,9 @@ it will also import the Player constructor directly:
     + [play](#play-promisevoid-passworderrorprivacyerrorerror)
     + [unload](#unload-promisevoid-error)
     + [destroy](#destroy-promisevoid-error)
+    + [requestFullscreen](#requestfullscreen-promisevoid-error)
+    + [exitFullscreen](#exitfullscreen-promisevoid-error)
+    + [getFullscreen](#getfullscreen-promiseboolean-error)
     + [getAutopause](#getautopause-promiseboolean-unsupportederrorerror)
     + [setAutopause](#setautopauseautopause-boolean-promiseboolean-unsupportederrorerror)
     + [getBuffered](#getbuffered-promisearray-error)
@@ -532,6 +535,42 @@ It won't be usable and a new one should be constructed
 ```js
 player.destroy().then(function() {
     // the player was destroyed
+}).catch(function(error) {
+    // an error occurred
+});
+```
+
+### requestFullscreen(): Promise&lt;void, Error&gt;
+
+Request the player enters fullscreen.
+
+```js
+player.requestFullscreen().then(function() {
+    // the player entered fullscreen
+}).catch(function(error) {
+    // an error occurred
+});
+```
+
+### exitFullscreen(): Promise&lt;void, Error&gt;
+
+Request the player exits fullscreen.
+
+```js
+player.exitFullscreen().then(function() {
+    // the player exits fullscreen
+}).catch(function(error) {
+    // an error occurred
+});
+```
+
+### getFullscreen(): Promise&lt;boolean, Error&gt;
+
+Checks whether the player is currently fullscreen.
+
+```js
+player.getFullscreen().then(function(fullscreen) {
+    // fullscreen = whether fullscreen is turned on or off
 }).catch(function(error) {
     // an error occurred
 });
