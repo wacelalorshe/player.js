@@ -438,6 +438,30 @@ class Player {
     }
 
     /**
+     * Request that the player enters fullscreen.
+     * @return {Promise}
+     */
+    requestFullscreen() {
+        return this.callMethod('requestFullscreen');
+    }
+
+    /**
+     * Request that the player exits fullscreen.
+     * @return {Promise}
+     */
+    exitFullscreen() {
+        return this.callMethod('exitFullscreen');
+    }
+
+    /**
+     * Returns true if the player is currently fullscreen.
+     * @return {Promise}
+     */
+    getFullscreen() {
+        return this.get('fullscreen');
+    }
+
+    /**
      * A promise to unload the video.
      *
      * @promise UnloadPromise

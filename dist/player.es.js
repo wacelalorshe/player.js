@@ -1480,6 +1480,36 @@ function () {
       return this.callMethod('play');
     }
     /**
+     * Request that the player enters fullscreen.
+     * @return {Promise}
+     */
+
+  }, {
+    key: "requestFullscreen",
+    value: function requestFullscreen() {
+      return this.callMethod('requestFullscreen');
+    }
+    /**
+     * Request that the player exits fullscreen.
+     * @return {Promise}
+     */
+
+  }, {
+    key: "exitFullscreen",
+    value: function exitFullscreen() {
+      return this.callMethod('exitFullscreen');
+    }
+    /**
+     * Returns true if the player is currently fullscreen.
+     * @return {Promise}
+     */
+
+  }, {
+    key: "getFullscreen",
+    value: function getFullscreen() {
+      return this.get('fullscreen');
+    }
+    /**
      * A promise to unload the video.
      *
      * @promise UnloadPromise
