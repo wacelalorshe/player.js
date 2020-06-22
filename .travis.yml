@@ -6,6 +6,5 @@ cache: yarn
 branches:
   only:
     - master
-    - /^greenkeeper/.*$/
 after_success:
   - yarn run report-coverage
