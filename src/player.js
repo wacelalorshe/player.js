@@ -7,6 +7,7 @@ import { storeCallback, getCallbacks, removeCallback, swapCallbacks } from './li
 import { getMethodName, isDomElement, isVimeoUrl, getVimeoUrl, isNode } from './lib/functions';
 import { getOEmbedParameters, getOEmbedData, createEmbed, initializeEmbeds, resizeEmbeds } from './lib/embed';
 import { parseMessageData, postMessage, processData } from './lib/postmessage';
+import screenfull from './lib/fullscreen.js';
 
 const playerMap = new WeakMap();
 const readyMap = new WeakMap();
@@ -228,6 +229,13 @@ class Player {
             throw new TypeError('The callback must be a function.');
         }
 
+        if (screenfull.isEnabled && (
+            eventName === 'fullscreenchange' || eventName === 'fullscreenerror'
+        )) {
+            screenfull.on(eventName, callback);
+            return;
+        }
+
         const callbacks = getCallbacks(this, `event:${eventName}`);
         if (callbacks.length === 0) {
             this.callMethod('addEventListener', eventName).catch(() => {
@@ -255,6 +263,13 @@ class Player {
 
         if (callback && typeof callback !== 'function') {
             throw new TypeError('The callback must be a function.');
+        }
+
+        if (screenfull.isEnabled && (
+            eventName === 'fullscreenchange' || eventName === 'fullscreenerror'
+        )) {
+            screenfull.off(eventName, callback);
+            return;
         }
 
         const lastCallback = removeCallback(this, `event:${eventName}`, callback);
@@ -442,6 +457,9 @@ class Player {
      * @return {Promise}
      */
     requestFullscreen() {
+        if (screenfull.isEnabled) {
+            return screenfull.request(this.element);
+        }
         return this.callMethod('requestFullscreen');
     }
 
@@ -450,6 +468,9 @@ class Player {
      * @return {Promise}
      */
     exitFullscreen() {
+        if (screenfull.isEnabled) {
+            return screenfull.exit();
+        }
         return this.callMethod('exitFullscreen');
     }
 
@@ -458,6 +479,9 @@ class Player {
      * @return {Promise}
      */
     getFullscreen() {
+        if (screenfull.isEnabled) {
+            return Promise.resolve(screenfull.isFullscreen);
+        }
         return this.get('fullscreen');
     }
 
