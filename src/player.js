@@ -7,10 +7,11 @@ import { storeCallback, getCallbacks, removeCallback, swapCallbacks } from './li
 import { getMethodName, isDomElement, isVimeoUrl, getVimeoUrl, isNode } from './lib/functions';
 import { getOEmbedParameters, getOEmbedData, createEmbed, initializeEmbeds, resizeEmbeds } from './lib/embed';
 import { parseMessageData, postMessage, processData } from './lib/postmessage';
-import screenfull from './lib/fullscreen.js';
+import { initializeScreenfull } from './lib/screenfull.js';
 
 const playerMap = new WeakMap();
 const readyMap = new WeakMap();
+let screenfull = {};
 
 class Player {
     /**
@@ -128,6 +129,23 @@ class Player {
             postMessage(this, 'ping');
         }
 
+        if (screenfull.isEnabled) {
+            const exitFullscreen = () => screenfull.exit();
+
+            screenfull.on('fullscreenchange', () => {
+                if (screenfull.isFullscreen) {
+                    storeCallback(this, 'event:exitFullscreen', exitFullscreen);
+                }
+                else {
+                    removeCallback(this, 'event:exitFullscreen', exitFullscreen);
+                }
+                // eslint-disable-next-line
+                this.ready().then(() => {
+                    postMessage(this, 'fullscreenchange', screenfull.isFullscreen);
+                });
+            });
+        }
+
         return this;
     }
 
@@ -229,13 +247,6 @@ class Player {
             throw new TypeError('The callback must be a function.');
         }
 
-        if (screenfull.isEnabled && (
-            eventName === 'fullscreenchange' || eventName === 'fullscreenerror'
-        )) {
-            screenfull.on(eventName, callback);
-            return;
-        }
-
         const callbacks = getCallbacks(this, `event:${eventName}`);
         if (callbacks.length === 0) {
             this.callMethod('addEventListener', eventName).catch(() => {
@@ -263,13 +274,6 @@ class Player {
 
         if (callback && typeof callback !== 'function') {
             throw new TypeError('The callback must be a function.');
-        }
-
-        if (screenfull.isEnabled && (
-            eventName === 'fullscreenchange' || eventName === 'fullscreenerror'
-        )) {
-            screenfull.off(eventName, callback);
-            return;
         }
 
         const lastCallback = removeCallback(this, `event:${eventName}`, callback);
@@ -1066,6 +1070,7 @@ class Player {
 
 // Setup embed only if this is not a node environment
 if (!isNode) {
+    screenfull = initializeScreenfull();
     initializeEmbeds();
     resizeEmbeds();
 }
