@@ -7,10 +7,11 @@ import { storeCallback, getCallbacks, removeCallback, swapCallbacks } from './li
 import { getMethodName, isDomElement, isVimeoUrl, getVimeoUrl, isNode } from './lib/functions';
 import { getOEmbedParameters, getOEmbedData, createEmbed, initializeEmbeds, resizeEmbeds } from './lib/embed';
 import { parseMessageData, postMessage, processData } from './lib/postmessage';
-import screenfull from './lib/fullscreen.js';
+import { initializeScreenfull } from './lib/screenfull.js';
 
 const playerMap = new WeakMap();
 const readyMap = new WeakMap();
+let screenfull = {};
 
 class Player {
     /**
@@ -1069,6 +1070,7 @@ class Player {
 
 // Setup embed only if this is not a node environment
 if (!isNode) {
+    screenfull = initializeScreenfull();
     initializeEmbeds();
     resizeEmbeds();
 }
