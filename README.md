@@ -221,6 +221,8 @@ it will also import the Player constructor directly:
     + [loaded](#loaded)
     + [durationchange](#durationchange)
     + [fullscreenchange](#fullscreenchange)
+    + [qualitychange](#qualitychange)
+    + [resize](#resize)
 * [Embed Options](#embed-options)
 
 ## Create a Player
@@ -1417,6 +1419,27 @@ Triggered when the player enters or exits fullscreen.
 ```js
 {
     fullscreen: true
+}
+```
+
+### qualitychange
+
+Triggered when the set quality changes.
+
+```js
+{
+    quality: '720p'
+}
+```
+
+### resize
+
+Triggered when the intrinsic size of the media changes.
+
+```js
+{
+    videoWidth: 1280,
+    videoHeight: 720
 }
 ```
 
