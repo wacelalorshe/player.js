@@ -200,6 +200,9 @@ it will also import the Player constructor directly:
     + [getVideoUrl](#getvideourl-promisestring-privacyerrorerror)
     + [getVolume](#getvolume-promisenumber-error)
     + [setVolume](#setvolumevolume-number-promisenumber-rangeerrorerror)
+    + [getQualities](#getqualities-promiseobject-error)
+    + [getQuality](#getquality-promisestring-error)
+    + [setQuality](#setqualityquality-string-promisestring-typeerrorerror)
 * [Events](#events)
     + [play](#play)
     + [playing](#playing)
@@ -1150,6 +1153,61 @@ player.setVolume(0.5).then(function(volume) {
     }
 });
 ```
+
+### getQualities(): Promise&lt;object[], Error&gt;
+
+Get the available qualities of the current video.
+
+```js
+player.getQualities().then(function(qualities) {
+    // qualities = an array of quality objects
+}).catch(function(error) {
+    // an error occurred
+});
+```
+
+Each quality object looks like this:
+
+```js
+{
+    "label": "4K",
+    "id": "2160p",
+    "active": true
+}
+```
+
+### getQuality(): Promise&lt;string, Error&gt;
+
+Get the current selected quality.
+
+```js
+player.getQuality().then(function(quality) {
+    // quality = the current selected quality
+}).catch(function(error) {
+    // an error occurred
+});
+```
+
+### setQuality(quality: string): Promise&lt;string, (TypeError|Error)&gt;
+
+Set the quality of the video. (available to Plus, PRO and Business accounts)
+
+```js
+player.setQuality('720p').then(function(quality) {
+    // quality was successfully set
+}).catch(function(error) {
+    switch (error.name) {
+        case 'TypeError':
+            // the quality selected is not valid
+            break;
+
+        default:
+            // some other error occurred
+            break;
+    }
+});
+```
+
 
 ## Events
 
