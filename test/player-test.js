@@ -112,51 +112,38 @@ test('future calls to destroyed player should not not work', async (t) => {
     await t.throwsAsync(() => player1.loadVideo(1));
 });
 
-test('player object includes all api methods', (t) => {
+test('player object includes all api methods', async (t) => {
     const iframe = document.querySelector('.one');
     const player = new Player(iframe);
 
-    t.true(typeof player.get === 'function');
-    t.true(typeof player.set === 'function');
-    t.true(typeof player.callMethod === 'function');
-    t.true(typeof player.on === 'function');
-    t.true(typeof player.off === 'function');
-    t.true(typeof player.loadVideo === 'function');
-    t.true(typeof player.enableTextTrack === 'function');
-    t.true(typeof player.disableTextTrack === 'function');
-    t.true(typeof player.pause === 'function');
-    t.true(typeof player.play === 'function');
-    t.true(typeof player.unload === 'function');
-    t.true(typeof player.getAutopause === 'function');
-    t.true(typeof player.setAutopause === 'function');
-    t.true(typeof player.getChapters === 'function');
-    t.true(typeof player.getCurrentChapter === 'function');
-    t.true(typeof player.getColor === 'function');
-    t.true(typeof player.setColor === 'function');
-    t.true(typeof player.getCurrentTime === 'function');
-    t.true(typeof player.setCurrentTime === 'function');
-    t.true(typeof player.getDuration === 'function');
-    t.true(typeof player.getEnded === 'function');
-    t.true(typeof player.getLoop === 'function');
-    t.true(typeof player.setLoop === 'function');
-    t.true(typeof player.getPaused === 'function');
-    t.true(typeof player.getPlaybackRate === 'function');
-    t.true(typeof player.setPlaybackRate === 'function');
-    t.true(typeof player.getTextTracks === 'function');
-    t.true(typeof player.getVideoEmbedCode === 'function');
-    t.true(typeof player.getVideoId === 'function');
-    t.true(typeof player.getVideoTitle === 'function');
-    t.true(typeof player.getVideoWidth === 'function');
-    t.true(typeof player.getVideoHeight === 'function');
-    t.true(typeof player.getVideoUrl === 'function');
-    t.true(typeof player.getVolume === 'function');
-    t.true(typeof player.setVolume === 'function');
-    t.true(typeof player.getBuffered === 'function');
-    t.true(typeof player.getPlayed === 'function');
-    t.true(typeof player.getSeekable === 'function');
-    t.true(typeof player.getSeeking === 'function');
-    t.true(typeof player.getMuted === 'function');
-    t.true(typeof player.setMuted === 'function');
+    const methods = Object.getOwnPropertyNames(Player.prototype)
+        .filter((method) => method !== 'constructor')
+
+    methods.forEach((method) => {
+        t.true(typeof player[method] === 'function');
+    });
+
+    const getters = methods.filter((method) => /^get[A-Z]/.test(method));
+    getters.forEach((method) => {
+        t.true(player[method]() instanceof Promise);
+    });
+
+    const setters = methods.filter((method) => /^set[A-Z]/.test(method));
+    for (const method of setters) {
+        await t.throwsAsync(() => player[method](), TypeError);
+    }
+
+    t.true(player.ready() instanceof Promise);
+    t.true(player.play() instanceof Promise);
+    t.true(player.pause() instanceof Promise);
+    t.true(player.loadVideo() instanceof Promise);
+    await t.throws(() => player.enableTextTrack(), TypeError);
+    t.true(player.enableTextTrack('en') instanceof Promise);
+    t.true(player.disableTextTrack() instanceof Promise);
+    t.true(player.addCuePoint() instanceof Promise);
+    t.true(player.removeCuePoint() instanceof Promise);
+    t.true(player.requestFullscreen() instanceof Promise);
+    t.true(player.exitFullscreen() instanceof Promise);
 });
 
 test('set requires a value', async (t) => {
