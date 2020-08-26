@@ -1,7 +1,6 @@
 import test from 'ava';
 import sinon from 'sinon';
 import html from './helpers/html';
-import { replaceTextInFile } from './helpers/replace';
 import Player from '../src/player';
 
 test('constructor accepts only Vimeo embeds', (t) => {
@@ -113,19 +112,6 @@ test('future calls to destroyed player should not not work', async (t) => {
     await t.throwsAsync(() => player1.loadVideo(1));
 });
 
-// this works but eslint complains about the dynamic import
-// test.serial('player object in browser env', async (t) => {
-//     await replaceTextInFile('src/player.js', '!isNode', '!!true');
-
-//     const { default: BrowserPlayer } = await import('../src/player');
-//     const iframe = document.querySelector('.one');
-//     const player = new BrowserPlayer(iframe);
-
-//     t.true(player instanceof BrowserPlayer);
-
-//     await replaceTextInFile('src/player.js', '!!true', '!isNode');
-// });
-
 test('player object includes all api methods', async (t) => {
     const iframe = document.querySelector('.one');
     const player = new Player(iframe);
@@ -151,7 +137,7 @@ test('player object includes all api methods', async (t) => {
     t.true(player.play() instanceof Promise);
     t.true(player.pause() instanceof Promise);
     t.true(player.loadVideo() instanceof Promise);
-    t.throws(() => player.enableTextTrack(), TypeError);
+    await t.throws(() => player.enableTextTrack(), TypeError);
     t.true(player.enableTextTrack('en') instanceof Promise);
     t.true(player.disableTextTrack() instanceof Promise);
     t.true(player.addCuePoint() instanceof Promise);

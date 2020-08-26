@@ -6,6 +6,7 @@
  * Check to see this is a node environment.
  * @type {Boolean}
  */
+/* global global */
 export const isNode = typeof global !== 'undefined' &&
   ({}).toString.call(global) === '[object global]';
 
