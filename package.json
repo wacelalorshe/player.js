@@ -60,7 +60,7 @@
     "chalk": "^3.0.0",
     "chokidar": "^3.3.1",
     "chokidar-cli": "^2.1.0",
-    "codecov": "^3.6.5",
+    "codecov": "^3.7.2",
     "cross-env": "^7.0.0",
     "eslint": "^6.8.0",
     "eslint-plugin-ava": "^6.0.0",
