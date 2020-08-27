@@ -23,7 +23,7 @@ test('getOEmbedParameters builds off of a defaults object', (t) => {
 
 test('getOEmbedData doesn’t operate on non-Vimeo urls', async (t) => {
     t.plan(1);
-    await t.throwsAsync(() => getOEmbedData('https://notvimeo.com'), TypeError);
+    await t.throwsAsync(() => getOEmbedData('https://notvimeo.com'), { instanceOf: TypeError });
 });
 
 test('getOEmbedData returns a json oembed response', async (t) => {
@@ -36,7 +36,7 @@ test('getOEmbedData returns a json oembed response', async (t) => {
 test('createEmbed should throw if there’s no element', (t) => {
     t.throws(() => {
         createEmbed({ html: 'html' });
-    }, TypeError);
+    }, { instanceOf: TypeError });
 });
 
 test('createEmbed returns the already-initialized iframe', (t) => {

@@ -10,6 +10,9 @@ module.exports = {
     rules: {
         'compat/compat': ERROR
     },
+    globals: {
+        XDomainRequest: false
+    },
     settings: {
         'polyfills': [
             'Promise'
