@@ -1125,9 +1125,7 @@ var playerMap = new WeakMap();
 var readyMap = new WeakMap();
 var screenfull = {};
 
-var Player =
-/*#__PURE__*/
-function () {
+var Player = /*#__PURE__*/function () {
   /**
    * Create a Player.
    *

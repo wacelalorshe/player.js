@@ -2,7 +2,7 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
-  (global = global || self, (global.Vimeo = global.Vimeo || {}, global.Vimeo.Player = factory()));
+  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, (global.Vimeo = global.Vimeo || {}, global.Vimeo.Player = factory()));
 }(this, (function () { 'use strict';
 
   function _classCallCheck(instance, Constructor) {
@@ -1131,9 +1131,7 @@
   var readyMap = new WeakMap();
   var screenfull = {};
 
-  var Player =
-  /*#__PURE__*/
-  function () {
+  var Player = /*#__PURE__*/function () {
     /**
      * Create a Player.
      *
