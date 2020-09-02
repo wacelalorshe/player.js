@@ -6,19 +6,19 @@ import Player from '../src/player';
 test('constructor accepts only Vimeo embeds', (t) => {
     t.throws(() => {
         void new Player(html`<div data-vimeo-initialized><iframe></iframe></div>`);
-    });
+    }, null);
 
     t.throws(() => {
         void new Player('string');
-    });
+    }, null);
 
     t.throws(() => {
         void new Player(html`<iframe></iframe>`);
-    });
+    }, null);
 
     t.throws(() => {
         void new Player(html`<iframe src="https://www.youtube.com/embed/Uj3_KqkI9Zo"></iframe>`);
-    });
+    }, null);
 });
 
 test('contructor does not throw if jquery is not present', (t) => {
@@ -130,14 +130,14 @@ test('player object includes all api methods', async (t) => {
 
     const setters = methods.filter((method) => /^set[A-Z]/.test(method));
     for (const method of setters) {
-        await t.throwsAsync(() => player[method](), TypeError);
+        await t.throwsAsync(() => player[method](), { instanceOf: TypeError });
     }
 
     t.true(player.ready() instanceof Promise);
     t.true(player.play() instanceof Promise);
     t.true(player.pause() instanceof Promise);
     t.true(player.loadVideo() instanceof Promise);
-    await t.throws(() => player.enableTextTrack(), TypeError);
+    await t.throws(() => player.enableTextTrack(), { instanceOf: TypeError });
     t.true(player.enableTextTrack('en') instanceof Promise);
     t.true(player.disableTextTrack() instanceof Promise);
     t.true(player.addCuePoint() instanceof Promise);
@@ -150,16 +150,16 @@ test('set requires a value', async (t) => {
     const iframe = document.querySelector('.one');
     const player = new Player(iframe);
 
-    await t.throwsAsync(() => player.set('color'), TypeError);
+    await t.throwsAsync(() => player.set('color'), { instanceOf: TypeError });
 });
 
 test('on requires an event and a callback', (t) => {
     const iframe = document.querySelector('.one');
     const player = new Player(iframe);
 
-    t.throws(() => player.on(), TypeError, 'You must pass an event name.');
-    t.throws(() => player.on('play'), TypeError, 'You must pass a callback function.');
-    t.throws(() => player.on('play', 'string'), TypeError, 'The callback must be a function.');
+    t.throws(() => player.on(), { instanceOf: TypeError }, 'You must pass an event name.');
+    t.throws(() => player.on('play'), { instanceOf: TypeError }, 'You must pass a callback function.');
+    t.throws(() => player.on('play', 'string'), { instanceOf: TypeError }, 'The callback must be a function.');
     t.notThrows(() => player.on('play', () => {
     }));
 });
@@ -168,8 +168,8 @@ test('off requires an event name, and the optional callback must be a function',
     const iframe = document.querySelector('.one');
     const player = new Player(iframe);
 
-    t.throws(() => player.off(), TypeError, 'You must pass an event name.');
-    t.throws(() => player.off('play', 'string'), TypeError, 'The callback must be a function.');
+    t.throws(() => player.off(), { instanceOf: TypeError }, 'You must pass an event name.');
+    t.throws(() => player.off('play', 'string'), { instanceOf: TypeError }, 'The callback must be a function.');
     t.notThrows(() => player.off('play', () => {
     }));
 });

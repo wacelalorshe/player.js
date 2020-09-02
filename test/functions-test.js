@@ -62,17 +62,17 @@ test('getVimeoUrl correctly returns a url from the embed parameters', (t) => {
 test('getVimeoUrl throws when the required keys don’t exist', (t) => {
     t.throws(() => {
         getVimeoUrl();
-    }, Error);
+    }, { instanceOf: Error });
 
     t.throws(() => {
         getVimeoUrl({ id: 'string' });
-    }, TypeError);
+    }, { instanceOf: TypeError });
 
     t.throws(() => {
         getVimeoUrl({ id: 'https://notvimeo.com/2' });
-    }, TypeError);
+    }, { instanceOf: TypeError });
 
     t.throws(() => {
         getVimeoUrl({ url: 'https://notvimeo.com/2' });
-    }, TypeError);
+    }, { instanceOf: TypeError });
 });
