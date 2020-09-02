@@ -201,6 +201,9 @@ it will also import the Player constructor directly:
     + [getVideoUrl](#getvideourl-promisestring-privacyerrorerror)
     + [getVolume](#getvolume-promisenumber-error)
     + [setVolume](#setvolumevolume-number-promisenumber-rangeerrorerror)
+    + [getQualities](#getqualities-promiseobject-error)
+    + [getQuality](#getquality-promisestring-error)
+    + [setQuality](#setqualityquality-string-promisestring-typeerrorerror)
 * [Events](#events)
     + [play](#play)
     + [playing](#playing)
@@ -222,6 +225,9 @@ it will also import the Player constructor directly:
     + [loaded](#loaded)
     + [durationchange](#durationchange)
     + [fullscreenchange](#fullscreenchange)
+    + [qualitychange](#qualitychange)
+    + [resize](#resize)
+
 
 ## Create a Player
 
@@ -1182,6 +1188,61 @@ player.setVolume(0.5).then(function(volume) {
 });
 ```
 
+### getQualities(): Promise&lt;object[], Error&gt;
+
+Get the available qualities of the current video.
+
+```js
+player.getQualities().then(function(qualities) {
+    // qualities = an array of quality objects
+}).catch(function(error) {
+    // an error occurred
+});
+```
+
+Each quality object looks like this:
+
+```js
+{
+    "label": "4K",
+    "id": "2160p",
+    "active": true
+}
+```
+
+### getQuality(): Promise&lt;string, Error&gt;
+
+Get the current selected quality.
+
+```js
+player.getQuality().then(function(quality) {
+    // quality = the current selected quality
+}).catch(function(error) {
+    // an error occurred
+});
+```
+
+### setQuality(quality: string): Promise&lt;string, (TypeError|Error)&gt;
+
+Set the quality of the video. (available to Plus, PRO and Business accounts)
+
+```js
+player.setQuality('720p').then(function(quality) {
+    // quality was successfully set
+}).catch(function(error) {
+    switch (error.name) {
+        case 'TypeError':
+            // the quality selected is not valid
+            break;
+
+        default:
+            // some other error occurred
+            break;
+    }
+});
+```
+
+
 ## Events
 
 You can listen for events in the player by attaching a callback using `.on()`:
@@ -1453,3 +1514,23 @@ Triggered when the player enters or exits fullscreen.
 }
 ```
 
+### qualitychange
+
+Triggered when the set quality changes.
+
+```js
+{
+    quality: '720p'
+}
+```
+
+### resize
+
+Triggered when the intrinsic size of the media changes.
+
+```js
+{
+    videoWidth: 1280,
+    videoHeight: 720
+}
+```

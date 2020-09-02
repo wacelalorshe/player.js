@@ -2125,6 +2125,62 @@ function () {
       return this.get('played');
     }
     /**
+     * A promise to get the qualities available of the current video.
+     *
+     * @promise GetQualitiesPromise
+     * @fulfill {Array} The qualities of the video.
+     */
+
+    /**
+     * Get the qualities of the current video.
+     *
+     * @return {GetQualitiesPromise}
+     */
+
+  }, {
+    key: "getQualities",
+    value: function getQualities() {
+      return this.get('qualities');
+    }
+    /**
+     * A promise to get the current set quality of the video.
+     *
+     * @promise GetQualityPromise
+     * @fulfill {string} The current set quality.
+     */
+
+    /**
+     * Get the current set quality of the video.
+     *
+     * @return {GetQualityPromise}
+     */
+
+  }, {
+    key: "getQuality",
+    value: function getQuality() {
+      return this.get('quality');
+    }
+    /**
+     * A promise to set the video quality.
+     *
+     * @promise SetQualityPromise
+     * @fulfill {number} The quality was set.
+     * @reject {RangeError} The quality is not available.
+     */
+
+    /**
+     * Set a video quality.
+     *
+     * @param {string} quality
+     * @return {SetQualityPromise}
+     */
+
+  }, {
+    key: "setQuality",
+    value: function setQuality(quality) {
+      return this.set('quality', quality);
+    }
+    /**
      * A promise to get the seekable property of the video.
      *
      * @promise GetSeekablePromise
