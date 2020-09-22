@@ -1775,6 +1775,44 @@
         return this.get('buffered');
       }
       /**
+       * A promise to get the camera properties of the player.
+       *
+       * @promise GetCameraPromise
+       * @fulfill {Object} The camera properties.
+       */
+
+      /**
+       * For 360° videos get the camera properties for this player.
+       *
+       * @return {GetCameraPromise}
+       */
+
+    }, {
+      key: "getCameraProps",
+      value: function getCameraProps() {
+        return this.get('cameraProps');
+      }
+      /**
+       * A promise to set the camera properties of the player.
+       *
+       * @promise SetCameraPromise
+       * @fulfill {Object} The camera was successfully set.
+       * @reject {RangeError} The range was out of bounds.
+       */
+
+      /**
+       * For 360° videos set the camera properties for this player.
+       *
+       * @param {Object} camera The camera properties
+       * @return {SetCameraPromise}
+       */
+
+    }, {
+      key: "setCameraProps",
+      value: function setCameraProps(camera) {
+        return this.set('cameraProps', camera);
+      }
+      /**
        * A representation of a chapter.
        *
        * @typedef {Object} VimeoChapter
