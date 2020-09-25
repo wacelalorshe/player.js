@@ -479,6 +479,17 @@ class Player {
     }
 
     /**
+     * Returns true if the player is currently fullscreen.
+     * @return {Promise}
+     */
+    getFullscreen() {
+        if (screenfull.isEnabled) {
+            return Promise.resolve(screenfull.isFullscreen);
+        }
+        return this.get('fullscreen');
+    }
+
+    /**
      * Request that the player enters picture-in-picture.
      * @return {Promise}
      */
@@ -495,14 +506,11 @@ class Player {
     }
 
     /**
-     * Returns true if the player is currently fullscreen.
+     * Returns true if the player is currently picture-in-picture.
      * @return {Promise}
      */
-    getFullscreen() {
-        if (screenfull.isEnabled) {
-            return Promise.resolve(screenfull.isFullscreen);
-        }
-        return this.get('fullscreen');
+    getPictureInPicture() {
+        return this.get('pictureInPicture');
     }
 
     /**
