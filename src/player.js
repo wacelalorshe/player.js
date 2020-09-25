@@ -479,6 +479,22 @@ class Player {
     }
 
     /**
+     * Request that the player enters picture-in-picture.
+     * @return {Promise}
+     */
+    requestPictureInPicture() {
+        return this.callMethod('requestPictureInPicture');
+    }
+
+    /**
+     * Request that the player exits picture-in-picture.
+     * @return {Promise}
+     */
+    exitPictureInPicture() {
+        return this.callMethod('exitPictureInPicture');
+    }
+
+    /**
      * Returns true if the player is currently fullscreen.
      * @return {Promise}
      */
