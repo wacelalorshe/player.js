@@ -588,10 +588,17 @@ class Player {
     }
 
     /**
+     * @typedef {Object} CameraProperties
+     * @prop {number} props.yaw - Number between 0 and 360.
+     * @prop {number} props.pitch - Number between -90 and 90.
+     * @prop {number} props.roll - Number between -180 and 180.
+     * @prop {number} props.fov - The field of view in degrees.
+     */
+    /**
      * A promise to get the camera properties of the player.
      *
      * @promise GetCameraPromise
-     * @fulfill {Object} The camera properties.
+     * @fulfill {CameraProperties} The camera properties.
      */
     /**
      * For 360° videos get the camera properties for this player.
@@ -612,7 +619,7 @@ class Player {
     /**
      * For 360° videos set the camera properties for this player.
      *
-     * @param {Object} camera The camera properties
+     * @param {CameraProperties} camera The camera properties
      * @return {SetCameraPromise}
      */
     setCameraProps(camera) {
