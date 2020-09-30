@@ -226,6 +226,7 @@ it will also import the Player constructor directly:
     + [durationchange](#durationchange)
     + [fullscreenchange](#fullscreenchange)
     + [qualitychange](#qualitychange)
+    + [camerachange](#camerachange)
     + [resize](#resize)
 
 
@@ -1521,6 +1522,19 @@ Triggered when the set quality changes.
 ```js
 {
     quality: '720p'
+}
+```
+
+### camerachange
+
+Triggered when any of the camera properties change for 360° videos.
+
+```js
+{
+    yaw: 270,
+    pitch: 90,
+    roll: 0,
+    fov: 45
 }
 ```
 
