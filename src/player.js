@@ -588,6 +588,45 @@ class Player {
     }
 
     /**
+     * @typedef {Object} CameraProperties
+     * @prop {number} props.yaw - Number between 0 and 360.
+     * @prop {number} props.pitch - Number between -90 and 90.
+     * @prop {number} props.roll - Number between -180 and 180.
+     * @prop {number} props.fov - The field of view in degrees.
+     */
+    /**
+     * A promise to get the camera properties of the player.
+     *
+     * @promise GetCameraPromise
+     * @fulfill {CameraProperties} The camera properties.
+     */
+    /**
+     * For 360° videos get the camera properties for this player.
+     *
+     * @return {GetCameraPromise}
+     */
+    getCameraProps() {
+        return this.get('cameraProps');
+    }
+
+    /**
+     * A promise to set the camera properties of the player.
+     *
+     * @promise SetCameraPromise
+     * @fulfill {Object} The camera was successfully set.
+     * @reject {RangeError} The range was out of bounds.
+     */
+    /**
+     * For 360° videos set the camera properties for this player.
+     *
+     * @param {CameraProperties} camera The camera properties
+     * @return {SetCameraPromise}
+     */
+    setCameraProps(camera) {
+        return this.set('cameraProps', camera);
+    }
+
+    /**
      * A representation of a chapter.
      *
      * @typedef {Object} VimeoChapter

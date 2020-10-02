@@ -204,6 +204,8 @@ it will also import the Player constructor directly:
     + [getQualities](#getqualities-promiseobject-error)
     + [getQuality](#getquality-promisestring-error)
     + [setQuality](#setqualityquality-string-promisestring-typeerrorerror)
+    + [getCameraProps](#getcameraprops-promiseobject-error)
+    + [setCameraProps](#setcamerapropscameraprops-object-promiseobject-rangeerrorerror)
 * [Events](#events)
     + [play](#play)
     + [playing](#playing)
@@ -226,6 +228,7 @@ it will also import the Player constructor directly:
     + [durationchange](#durationchange)
     + [fullscreenchange](#fullscreenchange)
     + [qualitychange](#qualitychange)
+    + [camerachange](#camerachange)
     + [resize](#resize)
 
 
@@ -1242,6 +1245,54 @@ player.setQuality('720p').then(function(quality) {
 });
 ```
 
+### getCameraProps(): Promise&lt;object, Error&gt;
+
+Get the current camera properties for a 360° video.
+
+```js
+player.getCameraProps().then(function(cameraProps) {
+    // cameraProps = the current camera properties
+}).catch(function(error) {
+    // an error occurred
+});
+```
+
+Each `cameraProps` object looks like this:
+
+```js
+{
+    "yaw": 360,
+    "pitch": 90,
+    "roll": 180,
+    "fov": 45
+}
+```
+
+### setCameraProps(cameraProps: object): Promise&lt;object, (RangeError|Error)&gt;
+
+Set the camera properties for a 360° video.
+
+```js
+player.setCameraProps({
+    "yaw": 360,     // Number between 0 and 360, left and right.
+    "pitch": 90,    // Number between -90 and 90, up and down.
+    "roll": 180,    // Number between -180 and 180.
+    "fov": 45       // The field of view in degrees.
+}).then(function(cameraProps) {
+    // cameraProps was successfully set
+}).catch(function(error) {
+    switch (error.name) {
+        case 'RangeError':
+            // one of the camera properties is out of range
+            break;
+
+        default:
+            // some other error occurred
+            break;
+    }
+});
+```
+
 
 ## Events
 
@@ -1521,6 +1572,19 @@ Triggered when the set quality changes.
 ```js
 {
     quality: '720p'
+}
+```
+
+### camerachange
+
+Triggered when any of the camera properties change for 360° videos.
+
+```js
+{
+    yaw: 270,
+    pitch: 90,
+    roll: 0,
+    fov: 45
 }
 ```
 
