@@ -1,4 +1,4 @@
-/*! @vimeo/player v2.13.0 | (c) 2020 Vimeo | MIT License | https://github.com/vimeo/player.js */
+/*! @vimeo/player v2.14.0 | (c) 2020 Vimeo | MIT License | https://github.com/vimeo/player.js */
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -1769,10 +1769,18 @@ var Player = /*#__PURE__*/function () {
       return this.get('buffered');
     }
     /**
+     * @typedef {Object} CameraProperties
+     * @prop {number} props.yaw - Number between 0 and 360.
+     * @prop {number} props.pitch - Number between -90 and 90.
+     * @prop {number} props.roll - Number between -180 and 180.
+     * @prop {number} props.fov - The field of view in degrees.
+     */
+
+    /**
      * A promise to get the camera properties of the player.
      *
      * @promise GetCameraPromise
-     * @fulfill {Object} The camera properties.
+     * @fulfill {CameraProperties} The camera properties.
      */
 
     /**
@@ -1797,7 +1805,7 @@ var Player = /*#__PURE__*/function () {
     /**
      * For 360° videos set the camera properties for this player.
      *
-     * @param {Object} camera The camera properties
+     * @param {CameraProperties} camera The camera properties
      * @return {SetCameraPromise}
      */
 
