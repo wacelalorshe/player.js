@@ -168,6 +168,9 @@ it will also import the Player constructor directly:
     + [requestFullscreen](#requestfullscreen-promisevoid-error)
     + [exitFullscreen](#exitfullscreen-promisevoid-error)
     + [getFullscreen](#getfullscreen-promiseboolean-error)
+    + [requestPictureInPicture](#requestpictureinpicture-promisevoid-error)
+    + [exitPictureInPicture](#exitpictureinpicture-promisevoid-error)
+    + [getPictureInPicture](#getpictureinpicture-promiseboolean-error)
     + [getAutopause](#getautopause-promiseboolean-unsupportederrorerror)
     + [setAutopause](#setautopauseautopause-boolean-promiseboolean-unsupportederrorerror)
     + [getBuffered](#getbuffered-promisearray-error)
@@ -615,6 +618,42 @@ Checks whether the player is currently fullscreen.
 ```js
 player.getFullscreen().then(function(fullscreen) {
     // fullscreen = whether fullscreen is turned on or off
+}).catch(function(error) {
+    // an error occurred
+});
+```
+
+### requestPictureInPicture(): Promise&lt;void, Error&gt;
+
+Request the player enters picture-in-picture.
+
+```js
+player.requestPictureInPicture().then(function() {
+    // the player entered picture-in-picture
+}).catch(function(error) {
+    // an error occurred
+});
+```
+
+### exitPictureInPicture(): Promise&lt;void, Error&gt;
+
+Request the player exits picture-in-picture.
+
+```js
+player.exitPictureInPicture().then(function() {
+    // the player exits picture-in-picture
+}).catch(function(error) {
+    // an error occurred
+});
+```
+
+### getPictureInPicture(): Promise&lt;boolean, Error&gt;
+
+Checks whether the player is currently picture-in-picture.
+
+```js
+player.getPictureInPicture().then(function(pip) {
+    // pip = whether picture-in-picture is turned on or off
 }).catch(function(error) {
     // an error occurred
 });
