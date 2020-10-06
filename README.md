@@ -230,6 +230,8 @@ it will also import the Player constructor directly:
     + [qualitychange](#qualitychange)
     + [camerachange](#camerachange)
     + [resize](#resize)
+    + [enterpictureinpicture](#enterpictureinpicture)
+    + [leavepictureinpicture](#leavepictureinpicture)
 
 
 ## Create a Player
@@ -1598,3 +1600,11 @@ Triggered when the intrinsic size of the media changes.
     videoHeight: 720
 }
 ```
+
+### enterpictureinpicture
+
+Triggered when the player enters picture-in-picture.
+
+### leavepictureinpicture
+
+Triggered when the player leaves picture-in-picture.
