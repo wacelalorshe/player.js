@@ -526,6 +526,16 @@ class Player {
                 this.element.parentNode.removeChild(this.element);
             }
 
+            // If the clip is private there is a case where the element stays the
+            // div element. Destroy should reset the div and remove the iframe child.
+            if (this.element && this.element.nodeName === 'DIV' && this.element.parentNode) {
+                this.element.removeAttribute('data-vimeo-initialized');
+                const iframe = this.element.querySelector('iframe');
+                if (iframe && iframe.parentNode) {
+                    iframe.parentNode.removeChild(iframe);
+                }
+            }
+
             this._window.removeEventListener('message', this._onMessage);
 
             resolve();
