@@ -1703,6 +1703,18 @@
 
           if (_this5.element && _this5.element.nodeName === 'IFRAME' && _this5.element.parentNode) {
             _this5.element.parentNode.removeChild(_this5.element);
+          } // If the clip is private there is a case where the element stays the
+          // div element. Destroy should reset the div and remove the iframe child.
+
+
+          if (_this5.element && _this5.element.nodeName === 'DIV' && _this5.element.parentNode) {
+            _this5.element.removeAttribute('data-vimeo-initialized');
+
+            var iframe = _this5.element.querySelector('iframe');
+
+            if (iframe && iframe.parentNode) {
+              iframe.parentNode.removeChild(iframe);
+            }
           }
 
           _this5._window.removeEventListener('message', _this5._onMessage);
