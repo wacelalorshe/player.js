@@ -339,6 +339,7 @@ responsive  | `false`  | Resize according their parent element (experimental)
 maxheight   |          | Same as height, but video will not exceed the native size of the video.
 maxwidth    |          | Same as width, but video will not exceed the native size of the video.
 muted       | `false`  | Mute this video on load. Required to autoplay in certain browsers.
+pip         | `false`   | Show the picture-in-picture button in the controlbar and enable the picture-in-picture API.
 playsinline | `true`   | Play video inline on mobile devices, to automatically go fullscreen on playback set this parameter to `false`.
 portrait    | `true`   | Show the portrait on the video.
 quality     |          | Vimeo Plus, PRO, and Business members can default an embedded video to a specific quality on desktop. Possible values: `4K`, `2K`, `1080p`, `720p`, `540p`, `360p` and `240p` https://help.vimeo.com/hc/en-us/articles/224983008-Setting-default-quality-for-embedded-videos
