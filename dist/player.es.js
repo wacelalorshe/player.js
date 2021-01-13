@@ -1,4 +1,4 @@
-/*! @vimeo/player v2.14.1 | (c) 2020 Vimeo | MIT License | https://github.com/vimeo/player.js */
+/*! @vimeo/player v2.14.1 | (c) 2021 Vimeo | MIT License | https://github.com/vimeo/player.js */
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -1652,6 +1652,36 @@ var Player = /*#__PURE__*/function () {
       }
 
       return this.get('fullscreen');
+    }
+    /**
+     * Request that the player enters picture-in-picture.
+     * @return {Promise}
+     */
+
+  }, {
+    key: "requestPictureInPicture",
+    value: function requestPictureInPicture() {
+      return this.callMethod('requestPictureInPicture');
+    }
+    /**
+     * Request that the player exits picture-in-picture.
+     * @return {Promise}
+     */
+
+  }, {
+    key: "exitPictureInPicture",
+    value: function exitPictureInPicture() {
+      return this.callMethod('exitPictureInPicture');
+    }
+    /**
+     * Returns true if the player is currently picture-in-picture.
+     * @return {Promise}
+     */
+
+  }, {
+    key: "getPictureInPicture",
+    value: function getPictureInPicture() {
+      return this.get('pictureInPicture');
     }
     /**
      * A promise to unload the video.

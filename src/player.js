@@ -490,6 +490,30 @@ class Player {
     }
 
     /**
+     * Request that the player enters picture-in-picture.
+     * @return {Promise}
+     */
+    requestPictureInPicture() {
+        return this.callMethod('requestPictureInPicture');
+    }
+
+    /**
+     * Request that the player exits picture-in-picture.
+     * @return {Promise}
+     */
+    exitPictureInPicture() {
+        return this.callMethod('exitPictureInPicture');
+    }
+
+    /**
+     * Returns true if the player is currently picture-in-picture.
+     * @return {Promise}
+     */
+    getPictureInPicture() {
+        return this.get('pictureInPicture');
+    }
+
+    /**
      * A promise to unload the video.
      *
      * @promise UnloadPromise

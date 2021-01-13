@@ -1,4 +1,4 @@
-/*! @vimeo/player v2.14.1 | (c) 2020 Vimeo | MIT License | https://github.com/vimeo/player.js */
+/*! @vimeo/player v2.14.1 | (c) 2021 Vimeo | MIT License | https://github.com/vimeo/player.js */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
@@ -1658,6 +1658,36 @@
         }
 
         return this.get('fullscreen');
+      }
+      /**
+       * Request that the player enters picture-in-picture.
+       * @return {Promise}
+       */
+
+    }, {
+      key: "requestPictureInPicture",
+      value: function requestPictureInPicture() {
+        return this.callMethod('requestPictureInPicture');
+      }
+      /**
+       * Request that the player exits picture-in-picture.
+       * @return {Promise}
+       */
+
+    }, {
+      key: "exitPictureInPicture",
+      value: function exitPictureInPicture() {
+        return this.callMethod('exitPictureInPicture');
+      }
+      /**
+       * Returns true if the player is currently picture-in-picture.
+       * @return {Promise}
+       */
+
+    }, {
+      key: "getPictureInPicture",
+      value: function getPictureInPicture() {
+        return this.get('pictureInPicture');
       }
       /**
        * A promise to unload the video.
