@@ -547,7 +547,13 @@ class Player {
             }
 
             if (this.element && this.element.nodeName === 'IFRAME' && this.element.parentNode) {
-                this.element.parentNode.removeChild(this.element);
+                // If we've added an additional wrapper div, remove that from the DOM.
+                // If not, just remove the iframe element.
+                if (this.element.parentNode.getAttribute('data-vimeo-wrapper') === 'true') {
+                    this.element.parentNode.parentNode.removeChild(this.element.parentNode);
+                } else {
+                    this.element.parentNode.removeChild(this.element);
+                }
             }
 
             // If the clip is private there is a case where the element stays the
@@ -556,7 +562,13 @@ class Player {
                 this.element.removeAttribute('data-vimeo-initialized');
                 const iframe = this.element.querySelector('iframe');
                 if (iframe && iframe.parentNode) {
-                    iframe.parentNode.removeChild(iframe);
+                    // If we've added an additional wrapper div, remove that from the DOM.
+                    // If not, just remove the iframe element.
+                    if (iframe.parentNode.getAttribute('data-vimeo-wrapper') === 'true') {
+                        iframe.parentNode.parentNode.removeChild(iframe.parentNode);
+                    } else {
+                        iframe.parentNode.removeChild(iframe);
+                    }
                 }
             }
 
