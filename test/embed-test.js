@@ -28,7 +28,7 @@ test('getOEmbedData doesn’t operate on non-Vimeo urls', async (t) => {
 
 test('getOEmbedData returns a json oembed response', async (t) => {
     t.plan(2);
-    const result = await getOEmbedData('https://player.vimeo.com/video/18');
+    const result = await getOEmbedData('https://player.vimeo.com/video/336812660');
     t.is(typeof result, 'object');
     t.is(result.type, 'video');
 });
@@ -65,7 +65,7 @@ test('createEmbed returns the iframe from a responsive embed', (t) => {
 });
 
 test('initializeEmbeds should create embeds', async (t) => {
-    const div = html`<div data-vimeo-id="18" data-vimeo-width="640" id="handstick"></div>`;
+    const div = html`<div data-vimeo-id="336812660" data-vimeo-width="640" id="handstick"></div>`;
     document.body.appendChild(div);
 
     await new Promise((resolve, reject) => {
