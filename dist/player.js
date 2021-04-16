@@ -1734,7 +1734,7 @@
           if (_this5.element && _this5.element.nodeName === 'IFRAME' && _this5.element.parentNode) {
             // If we've added an additional wrapper div, remove that from the DOM.
             // If not, just remove the iframe element.
-            if (_this5._originalElement !== _this5.element.parentNode && _this5.element.parentNode.parentNode && _this5._originalElement) {
+            if (_this5.element.parentNode.parentNode && _this5._originalElement && _this5._originalElement !== _this5.element.parentNode) {
               _this5.element.parentNode.parentNode.removeChild(_this5.element.parentNode);
             } else {
               _this5.element.parentNode.removeChild(_this5.element);
@@ -1751,7 +1751,7 @@
             if (iframe && iframe.parentNode) {
               // If we've added an additional wrapper div, remove that from the DOM.
               // If not, just remove the iframe element.
-              if (_this5._originalElement !== iframe.parentNode && iframe.parentNode.parentNode && _this5._originalElement) {
+              if (iframe.parentNode.parentNode && _this5._originalElement && _this5._originalElement !== iframe.parentNode) {
                 iframe.parentNode.parentNode.removeChild(iframe.parentNode);
               } else {
                 iframe.parentNode.removeChild(iframe);

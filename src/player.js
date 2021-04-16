@@ -549,7 +549,7 @@ class Player {
             if (this.element && this.element.nodeName === 'IFRAME' && this.element.parentNode) {
                 // If we've added an additional wrapper div, remove that from the DOM.
                 // If not, just remove the iframe element.
-                if (this._originalElement !== this.element.parentNode && this.element.parentNode.parentNode && this._originalElement) {
+                if (this.element.parentNode.parentNode && this._originalElement && this._originalElement !== this.element.parentNode) {
                     this.element.parentNode.parentNode.removeChild(this.element.parentNode);
                 } else {
                     this.element.parentNode.removeChild(this.element);
@@ -564,7 +564,7 @@ class Player {
                 if (iframe && iframe.parentNode) {
                     // If we've added an additional wrapper div, remove that from the DOM.
                     // If not, just remove the iframe element.
-                    if (this._originalElement !== iframe.parentNode && iframe.parentNode.parentNode && this._originalElement) {
+                    if (iframe.parentNode.parentNode && this._originalElement && this._originalElement !== iframe.parentNode) {
                         iframe.parentNode.parentNode.removeChild(iframe.parentNode);
                     } else {
                         iframe.parentNode.removeChild(iframe);
