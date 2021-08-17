@@ -1018,6 +1018,8 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Terms */
 function initializeScreenfull() {
+  var document = typeof window !== 'undefined' && typeof window.document !== 'undefined' ? window.document : {};
+
   var fn = function () {
     var val;
     var fnMap = [['requestFullscreen', 'exitFullscreen', 'fullscreenElement', 'fullscreenEnabled', 'fullscreenchange', 'fullscreenerror'], // New WebKit
@@ -1043,20 +1045,23 @@ function initializeScreenfull() {
   }();
 
   var eventNameMap = {
-    fullscreenchange: fn.fullscreenchange,
-    fullscreenerror: fn.fullscreenerror
+    change: fn.fullscreenchange,
+    error: fn.fullscreenerror
   };
   var screenfull = {
-    request: function request(element) {
-      return new Promise(function (resolve, reject) {
-        var onFullScreenEntered = function onFullScreenEntered() {
-          screenfull.off('fullscreenchange', onFullScreenEntered);
-          resolve();
-        };
+    request: function request(element, options) {
+      var _this = this;
 
-        screenfull.on('fullscreenchange', onFullScreenEntered);
+      return new Promise(function (resolve, reject) {
+        var onFullScreenEntered = function () {
+          this.off('change', onFullScreenEntered);
+          resolve();
+        }.bind(_this);
+
+        _this.on('change', onFullScreenEntered);
+
         element = element || document.documentElement;
-        var returnPromise = element[fn.requestFullscreen]();
+        var returnPromise = element[fn.requestFullscreen](options);
 
         if (returnPromise instanceof Promise) {
           returnPromise.then(onFullScreenEntered).catch(reject);
@@ -1064,18 +1069,21 @@ function initializeScreenfull() {
       });
     },
     exit: function exit() {
+      var _this2 = this;
+
       return new Promise(function (resolve, reject) {
-        if (!screenfull.isFullscreen) {
+        if (!_this2.isFullscreen) {
           resolve();
           return;
         }
 
-        var onFullScreenExit = function onFullScreenExit() {
-          screenfull.off('fullscreenchange', onFullScreenExit);
+        var onFullScreenExit = function () {
+          this.off('change', onFullScreenExit);
           resolve();
-        };
+        }.bind(_this2);
 
-        screenfull.on('fullscreenchange', onFullScreenExit);
+        _this2.on('change', onFullScreenExit);
+
         var returnPromise = document[fn.exitFullscreen]();
 
         if (returnPromise instanceof Promise) {
@@ -1087,16 +1095,17 @@ function initializeScreenfull() {
       var eventName = eventNameMap[event];
 
       if (eventName) {
-        document.addEventListener(eventName, callback);
+        document.addEventListener(eventName, callback, false);
       }
     },
     off: function off(event, callback) {
       var eventName = eventNameMap[event];
 
       if (eventName) {
-        document.removeEventListener(eventName, callback);
+        document.removeEventListener(eventName, callback, false);
       }
-    }
+    },
+    raw: fn
   };
   Object.defineProperties(screenfull, {
     isFullscreen: {

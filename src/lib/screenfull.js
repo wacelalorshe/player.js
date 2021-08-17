@@ -10,6 +10,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 Terms */
 
 export function initializeScreenfull() {
+    const document = typeof window !== 'undefined' && typeof window.document !== 'undefined' ? window.document : {};
 
     const fn = (function() {
         let val;
@@ -79,23 +80,24 @@ export function initializeScreenfull() {
     }());
 
     const eventNameMap = {
-        fullscreenchange: fn.fullscreenchange,
-        fullscreenerror: fn.fullscreenerror
+        change: fn.fullscreenchange,
+        error: fn.fullscreenerror
     };
 
     const screenfull = {
-        request(element) {
+        request(element, options) {
             return new Promise((resolve, reject) => {
                 const onFullScreenEntered = function() {
-                    screenfull.off('fullscreenchange', onFullScreenEntered);
+                    this.off('change', onFullScreenEntered);
                     resolve();
-                };
+                }.bind(this);
 
-                screenfull.on('fullscreenchange', onFullScreenEntered);
+                this.on('change', onFullScreenEntered);
 
                 element = element || document.documentElement;
 
-                const returnPromise = element[fn.requestFullscreen]();
+                const returnPromise = element[fn.requestFullscreen](options);
+
                 if (returnPromise instanceof Promise) {
                     returnPromise.then(onFullScreenEntered).catch(reject);
                 }
@@ -103,19 +105,20 @@ export function initializeScreenfull() {
         },
         exit() {
             return new Promise((resolve, reject) => {
-                if (!screenfull.isFullscreen) {
+                if (!this.isFullscreen) {
                     resolve();
                     return;
                 }
 
                 const onFullScreenExit = function() {
-                    screenfull.off('fullscreenchange', onFullScreenExit);
+                    this.off('change', onFullScreenExit);
                     resolve();
-                };
+                }.bind(this);
 
-                screenfull.on('fullscreenchange', onFullScreenExit);
+                this.on('change', onFullScreenExit);
 
                 const returnPromise = document[fn.exitFullscreen]();
+
                 if (returnPromise instanceof Promise) {
                     returnPromise.then(onFullScreenExit).catch(reject);
                 }
@@ -124,15 +127,16 @@ export function initializeScreenfull() {
         on(event, callback) {
             const eventName = eventNameMap[event];
             if (eventName) {
-                document.addEventListener(eventName, callback);
+                document.addEventListener(eventName, callback, false);
             }
         },
         off(event, callback) {
             const eventName = eventNameMap[event];
             if (eventName) {
-                document.removeEventListener(eventName, callback);
+                document.removeEventListener(eventName, callback, false);
             }
-        }
+        },
+        raw: fn
     };
 
     Object.defineProperties(screenfull, {
