@@ -24,10 +24,10 @@ test('initializeScreenfull', (t) => {
     t.is(screenfull.isEnabled, false);
 
     const spy = sinon.spy();
-    t.is(screenfull.on('change', spy), undefined);
+    t.is(screenfull.on('fullscreenchange', spy), undefined);
     t.true(screenfull.request(document) instanceof Promise);
     t.true(spy.calledOnce);
     t.true(screenfull.exit() instanceof Promise);
     t.true(spy.calledTwice);
-    t.is(screenfull.off('change', spy), undefined);
+    t.is(screenfull.off('fullscreenchange', spy), undefined);
 });
