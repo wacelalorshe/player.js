@@ -1249,11 +1249,11 @@
       }
 
       if (screenfull.isEnabled) {
-        this.fullscreenchangeHandler = function () {
-          var exitFullscreen = function exitFullscreen() {
-            return screenfull.exit();
-          };
+        var exitFullscreen = function exitFullscreen() {
+          return screenfull.exit();
+        };
 
+        this.fullscreenchangeHandler = function () {
           if (screenfull.isFullscreen) {
             storeCallback(_this, 'event:exitFullscreen', exitFullscreen);
           } else {

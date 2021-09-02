@@ -130,8 +130,8 @@ class Player {
         }
 
         if (screenfull.isEnabled) {
+            const exitFullscreen = () => screenfull.exit();
             this.fullscreenchangeHandler = () => {
-                const exitFullscreen = () => screenfull.exit();
                 if (screenfull.isFullscreen) {
                     storeCallback(this, 'event:exitFullscreen', exitFullscreen);
                 }
