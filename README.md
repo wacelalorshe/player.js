@@ -31,7 +31,7 @@ Already have a player on the page? Pass the element to the `Vimeo.Player`
 constructor and you’re ready to go.
 
 ```html
-<iframe src="https://player.vimeo.com/video/76979871" width="640" height="360" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+<iframe src="https://player.vimeo.com/video/76979871?h=8272103f6e" width="640" height="360" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
 
 <script src="https://player.vimeo.com/api/player.js"></script>
 <script>
@@ -54,7 +54,7 @@ You can use the library to make the embed for you. All you need is an empty
 element and the video id or vimeo.com url (and optional
 [embed options](#embed-options)).
 
-**NOTE:** If the video [privacy settings](https://vimeo.zendesk.com/hc/en-us/articles/224817847-Privacy-settings-overview) are "Private", you will need to provide the full video URL as a `url` property.
+**NOTE:** If the video [privacy settings](https://vimeo.zendesk.com/hc/en-us/articles/224817847-Privacy-settings-overview) are "Private", instead of providing an `id` property, you will need to provide the full video URL as a `url` property and include the `h` parameter.
 
 ```html
 <div id="made-in-ny"></div>
@@ -85,9 +85,11 @@ attributes. Each element must have at least a `data-vimeo-id` or
 You can also add attributes for any of the [embed options](#embed-options),
 prefixed with `data-vimeo` (`data-vimeo-portrait="false"`, for example).
 
+**NOTE:** If the video [privacy settings](https://vimeo.zendesk.com/hc/en-us/articles/224817847-Privacy-settings-overview) are "Private", instead of providing a `data-vimeo-id` attribute, you will need to provide the full video URL in a `data-vimeo-url` attribute and include the `h` parameter.
+
 ```html
 <div data-vimeo-id="19231868" data-vimeo-width="640" id="handstick"></div>
-<div data-vimeo-url="https://vimeo.com/76979871" id="playertwo"></div>
+<div data-vimeo-url="https://player.vimeo.com/video/76979871?h=8272103f6e" id="playertwo"></div>
 
 <script src="https://player.vimeo.com/api/player.js"></script>
 <script>
@@ -138,7 +140,7 @@ Similarly, if you’re using [RequireJS](http://www.requirejs.org) in the browse
 it will also import the Player constructor directly:
 
 ```html
-<iframe src="https://player.vimeo.com/video/76979871" width="640" height="360" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+<iframe src="https://player.vimeo.com/video/76979871?h=8272103f6e" width="640" height="360" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
 
 <script>
     require(['https://player.vimeo.com/api/player.js'], function (Player) {
@@ -270,6 +272,8 @@ Pass any element and an options object to the `Vimeo.Player` constructor to make
 an embed inside that element. The options object should consist of either an
 `id` or `url` and any other [embed options](#embed-options) for the embed.
 
+**NOTE:** If the video [privacy settings](https://vimeo.zendesk.com/hc/en-us/articles/224817847-Privacy-settings-overview) are "Private", instead of providing an `id` property, you will need to provide the full video URL as a `url` property and include the `h` parameter.
+
 ```html
 <div id="made-in-ny"></div>
 
@@ -282,7 +286,7 @@ an embed inside that element. The options object should consist of either an
     };
 
     // Will create inside the made-in-ny div:
-    // <iframe src="https://player.vimeo.com/video/59777392?loop=1" width="640" height="360" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+    // <iframe src="https://player.vimeo.com/video/59777392?h=ab882a04fd&loop=1" width="640" height="360" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
     var madeInNy = new Vimeo.Player('made-in-ny', options);
 </script>
 ```
@@ -311,11 +315,11 @@ lightbox opened from clicking on a thumbnail, for example).
     };
 
     // Will create inside the made-in-ny div:
-    // <iframe src="https://player.vimeo.com/video/59777392?loop=1" width="640" height="360" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+    // <iframe src="https://player.vimeo.com/video/59777392?h=ab882a04fd&loop=1" width="640" height="360" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
     var madeInNy = new Vimeo.Player('made-in-ny', options);
 
     // Will create inside the handstick div:
-    // <iframe src="https://player.vimeo.com/video/19231868?loop=1" width="500" height="281" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+    // <iframe src="https://player.vimeo.com/video/19231868?h=1034d5269b&loop=1" width="500" height="281" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
     var handstick = new Vimeo.Player(document.getElementById('handstick'), options);
 </script>
 ```
@@ -327,7 +331,7 @@ an object passed to the `Vimeo.Player` constructor. More information on embed op
 
 option      | default  | description
 ----------- | -------- | -----------
-id _or_ url |          | **Required.** Either the id or the url of the video.
+id _or_ url |          | **Required.** Either the id or the URL of the video. Note that if the video [privacy settings](https://vimeo.zendesk.com/hc/en-us/articles/224817847-Privacy-settings-overview) are "Private", instead of an id, a URL that includes the `h` parameter must be provided.
 autopause   | `true`   | Pause this video automatically when another one plays.
 autoplay    | `false`  | Automatically start playback of the video. Note that this won’t work on some devices.
 background  | `false`  | Enable the player's background mode which hides the controls, autoplays and loops the video (available to  Plus, PRO, or Business members).
@@ -429,10 +433,12 @@ player.off('play', onPlay);
 player.off('play');
 ```
 
-### loadVideo(options: number|object): Promise&lt;number|object, (TypeError|PasswordError|Error)&gt;
+### loadVideo(options: number|string|object): Promise&lt;number|object, (TypeError|PasswordError|Error)&gt;
 
 Load a new video into this embed. The promise will be resolved if the video is
 successfully loaded, or it will be rejected if it could not be loaded.
+
+**NOTE:** If the video [privacy settings](https://vimeo.zendesk.com/hc/en-us/articles/224817847-Privacy-settings-overview) are "Private", instead of providing an `id` argument, you will need to provide the full video URL as a `url` argument and include the `h` parameter.
 
 ```js
 player.loadVideo(76979871).then(function(id) {

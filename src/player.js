@@ -292,7 +292,7 @@ class Player {
      * A promise to load a new video.
      *
      * @promise LoadVideoPromise
-     * @fulfill {number} The video with this id successfully loaded.
+     * @fulfill {number} The video with this id or url successfully loaded.
      * @reject {TypeError} The id was not a number.
      */
     /**
@@ -300,7 +300,7 @@ class Player {
      * the video is successfully loaded, or it will be rejected if it could
      * not be loaded.
      *
-     * @param {number|object} options The id of the video or an object with embed options.
+     * @param {number|string|object} options The id of the video, the url of the video, or an object with embed options.
      * @return {LoadVideoPromise}
      */
     loadVideo(options) {
