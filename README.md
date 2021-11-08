@@ -35,8 +35,8 @@ constructor and you’re ready to go.
 
 <script src="https://player.vimeo.com/api/player.js"></script>
 <script>
-    var iframe = document.querySelector('iframe');
-    var player = new Vimeo.Player(iframe);
+    const iframe = document.querySelector('iframe');
+    const player = new Vimeo.Player(iframe);
 
     player.on('play', function() {
         console.log('played the video!');
@@ -61,13 +61,13 @@ element and the video id or vimeo.com url (and optional
 
 <script src="https://player.vimeo.com/api/player.js"></script>
 <script>
-    var options = {
+    const options = {
         id: 59777392,
         width: 640,
         loop: true
     };
 
-    var player = new Vimeo.Player('made-in-ny', options);
+    const player = new Vimeo.Player('made-in-ny', options);
 
     player.setVolume(0);
 
@@ -95,12 +95,12 @@ prefixed with `data-vimeo` (`data-vimeo-portrait="false"`, for example).
 <script>
     // If you want to control the embeds, you’ll need to create a Player object.
     // You can pass either the `<div>` or the `<iframe>` created inside the div.
-    var handstickPlayer = new Vimeo.Player('handstick');
+    const handstickPlayer = new Vimeo.Player('handstick');
     handstickPlayer.on('play', function() {
         console.log('played the handstick video!');
     });
 
-    var playerTwoPlayer = new Vimeo.Player('playertwo');
+    const playerTwoPlayer = new Vimeo.Player('playertwo');
     playerTwoPlayer.on('play', function() {
         console.log('played the player 2.0 video!');
     });
@@ -144,8 +144,8 @@ it will also import the Player constructor directly:
 
 <script>
     require(['https://player.vimeo.com/api/player.js'], function (Player) {
-        var iframe = document.querySelector('iframe');
-        var player = new Player(iframe);
+        const iframe = document.querySelector('iframe');
+        const player = new Player(iframe);
 
         player.on('play', function() {
             console.log('played the video!');
@@ -254,16 +254,16 @@ element, or pass a string that matches the `id` of the `<iframe>`.
 
 ```js
 // Select with the DOM API
-var iframe = document.querySelector('iframe');
-var iframePlayer = new Vimeo.Player(iframe);
+const iframe = document.querySelector('iframe');
+const iframePlayer = new Vimeo.Player(iframe);
 
 // Select with jQuery
 // If multiple elements are selected, it will use the first element.
-var jqueryPlayer = new Vimeo.Player($('iframe'));
+const jqueryPlayer = new Vimeo.Player($('iframe'));
 
 // Select with the `<iframe>`’s id
 // Assumes that there is an <iframe id="player1"> on the page.
-var idPlayer = new Vimeo.Player('player1');
+const idPlayer = new Vimeo.Player('player1');
 ```
 
 ### Create an embed
@@ -279,7 +279,7 @@ an embed inside that element. The options object should consist of either an
 
 <script src="https://player.vimeo.com/api/player.js"></script>
 <script>
-    var options = {
+    const options = {
         id: 59777392,
         width: 640,
         loop: true
@@ -287,7 +287,7 @@ an embed inside that element. The options object should consist of either an
 
     // Will create inside the made-in-ny div:
     // <iframe src="https://player.vimeo.com/video/59777392?h=ab882a04fd&loop=1" width="640" height="360" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
-    var madeInNy = new Vimeo.Player('made-in-ny', options);
+    const madeInNy = new Vimeo.Player('made-in-ny', options);
 </script>
 ```
 
@@ -309,18 +309,18 @@ lightbox opened from clicking on a thumbnail, for example).
 
 <script src="https://player.vimeo.com/api/player.js"></script>
 <script>
-    var options = {
+    const options = {
         width: 640,
         loop: true
     };
 
     // Will create inside the made-in-ny div:
     // <iframe src="https://player.vimeo.com/video/59777392?h=ab882a04fd&loop=1" width="640" height="360" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
-    var madeInNy = new Vimeo.Player('made-in-ny', options);
+    const madeInNy = new Vimeo.Player('made-in-ny', options);
 
     // Will create inside the handstick div:
     // <iframe src="https://player.vimeo.com/video/19231868?h=1034d5269b&loop=1" width="500" height="281" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
-    var handstick = new Vimeo.Player(document.getElementById('handstick'), options);
+    const handstick = new Vimeo.Player(document.getElementById('handstick'), options);
 </script>
 ```
 
@@ -405,7 +405,7 @@ single parameter, `data`, that contains the data for that event. See
 [events](#events) below for details.
 
 ```js
-var onPlay = function(data) {
+const onPlay = function(data) {
     // data is an object containing properties specific to that event
 };
 
@@ -419,7 +419,7 @@ that event if a `callback` isn’t passed, or only that specific callback if it 
 passed.
 
 ```js
-var onPlay = function(data) {
+const onPlay = function(data) {
     // data is an object containing properties specific to that event
 };
 
