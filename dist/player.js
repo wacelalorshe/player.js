@@ -1,4 +1,4 @@
-/*! @vimeo/player v2.16.1 | (c) 2021 Vimeo | MIT License | https://github.com/vimeo/player.js */
+/*! @vimeo/player v2.16.2 | (c) 2021 Vimeo | MIT License | https://github.com/vimeo/player.js */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
@@ -133,9 +133,9 @@
   }
 
   /*!
-   * weakmap-polyfill v2.0.1 - ECMAScript6 WeakMap polyfill
+   * weakmap-polyfill v2.0.4 - ECMAScript6 WeakMap polyfill
    * https://github.com/polygonplanet/weakmap-polyfill
-   * Copyright (c) 2015-2020 Polygon Planet <polygon.planet.aqua@gmail.com>
+   * Copyright (c) 2015-2021 polygonplanet <polygon.planet.aqua@gmail.com>
    * @license MIT
    */
   (function (self) {
@@ -146,8 +146,17 @@
 
     var hasOwnProperty = Object.prototype.hasOwnProperty;
 
+    var hasDefine = Object.defineProperty && function () {
+      try {
+        // Avoid IE8's broken Object.defineProperty
+        return Object.defineProperty({}, 'x', {
+          value: 1
+        }).x === 1;
+      } catch (e) {}
+    }();
+
     var defineProperty = function (object, name, value) {
-      if (Object.defineProperty) {
+      if (hasDefine) {
         Object.defineProperty(object, name, {
           configurable: true,
           writable: true,
@@ -262,7 +271,7 @@
     function isObject(x) {
       return Object(x) === x;
     }
-  })(typeof self !== 'undefined' ? self : typeof window !== 'undefined' ? window : typeof commonjsGlobal !== 'undefined' ? commonjsGlobal : commonjsGlobal);
+  })(typeof globalThis !== 'undefined' ? globalThis : typeof self !== 'undefined' ? self : typeof window !== 'undefined' ? window : typeof commonjsGlobal !== 'undefined' ? commonjsGlobal : commonjsGlobal);
 
   var npo_src = createCommonjsModule(function (module) {
   /*! Native Promise Only
@@ -1425,7 +1434,7 @@
        * A promise to load a new video.
        *
        * @promise LoadVideoPromise
-       * @fulfill {number} The video with this id successfully loaded.
+       * @fulfill {number} The video with this id or url successfully loaded.
        * @reject {TypeError} The id was not a number.
        */
 
@@ -1434,7 +1443,7 @@
        * the video is successfully loaded, or it will be rejected if it could
        * not be loaded.
        *
-       * @param {number|object} options The id of the video or an object with embed options.
+       * @param {number|string|object} options The id of the video, the url of the video, or an object with embed options.
        * @return {LoadVideoPromise}
        */
 
