@@ -340,7 +340,7 @@ color             | `00adef` | Specify the color of the video controls. Colors m
 controls          | `true`   | This parameter will hide all elements in the player (play bar, sharing buttons, etc) for a chromeless experience. ⚠️Warning: When using this parameter, the play bar and UI will be hidden. To start playback for your viewers, you'll need to either enable autoplay or use our player SDK to start and control playback. (available to Plus, PRO, or Business members)
 dnt               | `false`  | Block the player from tracking any session data, including cookies.
 height            |          | The exact height of the video. Defaults to the height of the largest available version of the video.
-interactiveparams |          | For interactive videos only that utilize live elements, this will contain key/value pairs for dynamic values to be passed into the live element. Ex: `[key1=value1,key2=value2]` 
+interactiveparams |          | Key-value pairs representing dynamic parameters that are utilized on interactive videos with live elements. Ex: `key1=value1,key2=value2`.More context on live elements can be found through [Wirewax](https://devhub.wirewax.com/docs/live-element).
 keyboard          | `true`   | Allows for keyboard input to trigger player events. If false, will ignore keyboard input. Tabbing will still be supported in either mode.
 loop              | `false`  | Play the video again when it reaches the end.
 maxheight         |          | Same as height, but video will not exceed the native size of the video.
