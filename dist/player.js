@@ -1,4 +1,4 @@
-/*! @vimeo/player v2.16.2 | (c) 2021 Vimeo | MIT License | https://github.com/vimeo/player.js */
+/*! @vimeo/player v2.16.3 | (c) 2022 Vimeo | MIT License | https://github.com/vimeo/player.js */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
@@ -133,9 +133,9 @@
   }
 
   /*!
-   * weakmap-polyfill v2.0.4 - ECMAScript6 WeakMap polyfill
+   * weakmap-polyfill v2.0.1 - ECMAScript6 WeakMap polyfill
    * https://github.com/polygonplanet/weakmap-polyfill
-   * Copyright (c) 2015-2021 polygonplanet <polygon.planet.aqua@gmail.com>
+   * Copyright (c) 2015-2020 Polygon Planet <polygon.planet.aqua@gmail.com>
    * @license MIT
    */
   (function (self) {
@@ -146,17 +146,8 @@
 
     var hasOwnProperty = Object.prototype.hasOwnProperty;
 
-    var hasDefine = Object.defineProperty && function () {
-      try {
-        // Avoid IE8's broken Object.defineProperty
-        return Object.defineProperty({}, 'x', {
-          value: 1
-        }).x === 1;
-      } catch (e) {}
-    }();
-
     var defineProperty = function (object, name, value) {
-      if (hasDefine) {
+      if (Object.defineProperty) {
         Object.defineProperty(object, name, {
           configurable: true,
           writable: true,
@@ -271,7 +262,7 @@
     function isObject(x) {
       return Object(x) === x;
     }
-  })(typeof globalThis !== 'undefined' ? globalThis : typeof self !== 'undefined' ? self : typeof window !== 'undefined' ? window : typeof commonjsGlobal !== 'undefined' ? commonjsGlobal : commonjsGlobal);
+  })(typeof self !== 'undefined' ? self : typeof window !== 'undefined' ? window : typeof commonjsGlobal !== 'undefined' ? commonjsGlobal : commonjsGlobal);
 
   var npo_src = createCommonjsModule(function (module) {
   /*! Native Promise Only
@@ -282,7 +273,7 @@
     // special form of UMD for polyfilling across evironments
     context[name] = context[name] || definition();
 
-    if ( module.exports) {
+    if (module.exports) {
       module.exports = context[name];
     }
   })("Promise", typeof commonjsGlobal != "undefined" ? commonjsGlobal : commonjsGlobal, function DEF() {
@@ -732,7 +723,7 @@
   /**
    * @module lib/embed
    */
-  var oEmbedParameters = ['autopause', 'autoplay', 'background', 'byline', 'color', 'controls', 'dnt', 'height', 'id', 'keyboard', 'loop', 'maxheight', 'maxwidth', 'muted', 'playsinline', 'portrait', 'responsive', 'speed', 'texttrack', 'title', 'transparent', 'url', 'width'];
+  var oEmbedParameters = ['autopause', 'autoplay', 'background', 'byline', 'color', 'controls', 'dnt', 'height', 'id', 'interactiveparams', 'keyboard', 'loop', 'maxheight', 'maxwidth', 'muted', 'playsinline', 'portrait', 'responsive', 'speed', 'texttrack', 'title', 'transparent', 'url', 'width'];
   /**
    * Get the 'data-vimeo'-prefixed attributes from an element as an object.
    *
