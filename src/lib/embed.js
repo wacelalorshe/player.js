@@ -14,6 +14,7 @@ const oEmbedParameters = [
     'dnt',
     'height',
     'id',
+    'interactiveparams',
     'keyboard',
     'loop',
     'maxheight',
