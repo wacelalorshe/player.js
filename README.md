@@ -239,6 +239,8 @@ it will also import the Player constructor directly:
     + [resize](#resize)
     + [enterpictureinpicture](#enterpictureinpicture)
     + [leavepictureinpicture](#leavepictureinpicture)
+    + [interactivehotspotclicked](#interactivehotspotclicked)
+    + [interactiveoverlaypanelclicked](#interactiveoverlaypanelclicked)
 
 
 ## Create a Player
@@ -1658,3 +1660,41 @@ Triggered when the player enters picture-in-picture.
 ### leavepictureinpicture
 
 Triggered when the player leaves picture-in-picture.
+
+### interactivehotspotclicked
+
+Triggered when a hotspot is clicked.
+
+```js
+{
+    action: 'seek', // event, none, overlay, seek, url
+    actionPreference: {
+        pauseOnAction: false, // on `event`, `overlay`, `seek`, `url` action
+        overlayId: 864334, // on `overlay` action
+        seekTo: 30, // on `seek` action
+        url: 'https://your-url.com', // on `url` action
+    },
+    currentTime: 15.585,
+    customPayloadData: null,
+    hotspotId: 8148223
+}
+```
+
+### interactiveoverlaypanelclicked
+
+Triggered when the overlay panel (buttons or images) within the interactive overlay is clicked.
+
+```js
+{
+    action: 'seek', // clickthrough, close, event, none, seek
+    actionPreference: {
+        pauseOnAction: true, // on `close`, `seek` action
+        seekTo: 30, // on `seek` action
+        url: 'https://your-url.com', // on `clickthrough` action
+    },
+    currentTime: 25.67,
+    customPayloadData: null,
+    overlayId: 864334,
+    panelId: 'c47193a0-8320-4572-9bcd-8425851b36e9'
+}
+```
