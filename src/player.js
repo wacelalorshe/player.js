@@ -147,6 +147,83 @@ class Player {
             screenfull.on('fullscreenchange', this.fullscreenchangeHandler);
         }
 
+        /*
+        The Google documentation for SEO says that we can dynamically insert
+        structured data into a page. We can leverage this to add key moments
+        (chapters) structured data to the *parent* page that contains our
+        iframe.
+        https://developers.google.com/search/docs/advanced/structured-data/generate-structured-data-with-javascript#custom-javascript
+        */
+        const addKeyMomentsMicrodata = () => {
+            const MIN_DURATION = 30;
+            const durationProm = this.getDuration();
+            const chaptersProm = this.getChapters();
+            const titleProm = this.getVideoTitle();
+            // const idProm = this.getVideoId();
+
+            Promise.all([
+                durationProm,
+                chaptersProm,
+                titleProm
+                // idProm
+            ]).then((values) => {
+                const [duration, allChapters, clipTitle] = values;
+                const chapters = allChapters.filter(
+                    (ch) => ch.startTime < duration
+                );
+
+                const numChapters = chapters.length;
+                if (duration >= MIN_DURATION && numChapters > 0) {
+                    const chaptersList = chapters.map((ch, i) => {
+                        const endOffset = i < numChapters - 1 ? chapters[i + 1].startTime : duration;
+                        return {
+                            name: ch.title,
+                            startOffset: ch.startTime,
+                            endOffset
+                        };
+                    });
+
+                    const { href } = window.location;
+                    const lastIndex = href.length - 1;
+                    const url = href.lastIndexOf('/') === lastIndex ? href.substring(0, lastIndex) : href;
+
+                    const hasPart = chaptersList.map((item) => {
+                        Object.defineProperties(item, { '@type': 'Clip', 'url': `${url}#t=${item.startOffset}` });
+
+                        return item;
+                    });
+                    const durationIso8601 = `PT${duration}S`;
+
+                    const microdata = [
+                        {
+                            '@context': 'http://schema.org',
+                            '@type': 'VideoObject',
+                            'name': clipTitle,
+                            'duration': durationIso8601,
+                            // uploadDate,      // example: '2021-10-14T15:48:27-04:00'
+                            // thumbnailUrl,    // example: 'https://devi.vimeocdn.com/video/1380639859-9df58541320b88aac3ab6b800818ebcdf85a309b6f5bfb62826a744d77f8f3c8-d'
+                            // description,     // example: 'This is a generic description'
+                            // embedUrl,        // example:  'https://player.vimeo.com/video/681136954?h=89af4defaa',
+                            hasPart
+                        }
+                    ];
+
+                    const structuredDataText = JSON.stringify(microdata);
+                    const s = document.createElement('script');
+                    s.setAttribute('type', 'application/ld+json');
+                    s.textContent = structuredDataText;
+                    document.head.appendChild(s);
+                }
+
+                return;
+            })
+                .catch((error) => {
+                    console.error(error.message);
+                });
+        };
+
+        addKeyMomentsMicrodata();
+
         return this;
     }
 

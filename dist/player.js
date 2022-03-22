@@ -27,6 +27,111 @@
     return Constructor;
   }
 
+  function _defineProperty(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {
+        value: value,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      });
+    } else {
+      obj[key] = value;
+    }
+
+    return obj;
+  }
+
+  function ownKeys(object, enumerableOnly) {
+    var keys = Object.keys(object);
+
+    if (Object.getOwnPropertySymbols) {
+      var symbols = Object.getOwnPropertySymbols(object);
+      if (enumerableOnly) symbols = symbols.filter(function (sym) {
+        return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+      });
+      keys.push.apply(keys, symbols);
+    }
+
+    return keys;
+  }
+
+  function _objectSpread2(target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i] != null ? arguments[i] : {};
+
+      if (i % 2) {
+        ownKeys(Object(source), true).forEach(function (key) {
+          _defineProperty(target, key, source[key]);
+        });
+      } else if (Object.getOwnPropertyDescriptors) {
+        Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+      } else {
+        ownKeys(Object(source)).forEach(function (key) {
+          Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+        });
+      }
+    }
+
+    return target;
+  }
+
+  function _slicedToArray(arr, i) {
+    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+  }
+
+  function _arrayWithHoles(arr) {
+    if (Array.isArray(arr)) return arr;
+  }
+
+  function _iterableToArrayLimit(arr, i) {
+    if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _e = undefined;
+
+    try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+
+        if (i && _arr.length === i) break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"] != null) _i["return"]();
+      } finally {
+        if (_d) throw _e;
+      }
+    }
+
+    return _arr;
+  }
+
+  function _unsupportedIterableToArray(o, minLen) {
+    if (!o) return;
+    if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+    var n = Object.prototype.toString.call(o).slice(8, -1);
+    if (n === "Object" && o.constructor) n = o.constructor.name;
+    if (n === "Map" || n === "Set") return Array.from(o);
+    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+  }
+
+  function _arrayLikeToArray(arr, len) {
+    if (len == null || len > arr.length) len = arr.length;
+
+    for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+
+    return arr2;
+  }
+
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+
   /**
    * @module lib/functions
    */
@@ -133,9 +238,9 @@
   }
 
   /*!
-   * weakmap-polyfill v2.0.1 - ECMAScript6 WeakMap polyfill
+   * weakmap-polyfill v2.0.4 - ECMAScript6 WeakMap polyfill
    * https://github.com/polygonplanet/weakmap-polyfill
-   * Copyright (c) 2015-2020 Polygon Planet <polygon.planet.aqua@gmail.com>
+   * Copyright (c) 2015-2021 polygonplanet <polygon.planet.aqua@gmail.com>
    * @license MIT
    */
   (function (self) {
@@ -146,8 +251,17 @@
 
     var hasOwnProperty = Object.prototype.hasOwnProperty;
 
+    var hasDefine = Object.defineProperty && function () {
+      try {
+        // Avoid IE8's broken Object.defineProperty
+        return Object.defineProperty({}, 'x', {
+          value: 1
+        }).x === 1;
+      } catch (e) {}
+    }();
+
     var defineProperty = function (object, name, value) {
-      if (Object.defineProperty) {
+      if (hasDefine) {
         Object.defineProperty(object, name, {
           configurable: true,
           writable: true,
@@ -262,7 +376,7 @@
     function isObject(x) {
       return Object(x) === x;
     }
-  })(typeof self !== 'undefined' ? self : typeof window !== 'undefined' ? window : typeof commonjsGlobal !== 'undefined' ? commonjsGlobal : commonjsGlobal);
+  })(typeof globalThis !== 'undefined' ? globalThis : typeof self !== 'undefined' ? self : typeof window !== 'undefined' ? window : typeof commonjsGlobal !== 'undefined' ? commonjsGlobal : commonjsGlobal);
 
   var npo_src = createCommonjsModule(function (module) {
   /*! Native Promise Only
@@ -273,7 +387,7 @@
     // special form of UMD for polyfilling across evironments
     context[name] = context[name] || definition();
 
-    if (module.exports) {
+    if ( module.exports) {
       module.exports = context[name];
     }
   })("Promise", typeof commonjsGlobal != "undefined" ? commonjsGlobal : commonjsGlobal, function DEF() {
@@ -1268,7 +1382,78 @@
 
         screenfull.on('fullscreenchange', this.fullscreenchangeHandler);
       }
+      /*
+      The Google documentation for SEO says that we can dynamically insert
+      structured data into a page. We can leverage this to add key moments
+      (chapters) structured data to the *parent* page that contains our
+      iframe.
+      https://developers.google.com/search/docs/advanced/structured-data/generate-structured-data-with-javascript#custom-javascript
+      */
 
+
+      var addKeyMomentsMicrodata = function addKeyMomentsMicrodata() {
+        var MIN_DURATION = 30;
+
+        var durationProm = _this.getDuration();
+
+        var chaptersProm = _this.getChapters();
+
+        var titleProm = _this.getVideoTitle();
+
+        var idProm = _this.getVideoId();
+
+        npo_src.all([durationProm, chaptersProm, titleProm, idProm]).then(function (values) {
+          var _values = _slicedToArray(values, 4),
+              duration = _values[0],
+              allChapters = _values[1],
+              clipTitle = _values[2],
+              id = _values[3];
+
+          var chapters = allChapters.filter(function (ch) {
+            return ch.startTime < duration;
+          });
+          var numChapters = chapters.length;
+
+          if (duration >= MIN_DURATION && numChapters > 0) {
+            var chaptersList = chapters.map(function (ch, i) {
+              var endOffset = i < numChapters - 1 ? chapters[i + 1].startTime : duration;
+              return {
+                name: ch.title,
+                startOffset: ch.startTime,
+                endOffset: endOffset
+              };
+            });
+            var href = window.location.href;
+            var lastIndex = href.length - 1;
+            var url = href.lastIndexOf("/") === lastIndex ? href.substring(0, lastIndex) : href;
+            var hasPart = chaptersList.map(function (item) {
+              return _objectSpread2(_objectSpread2({}, item), {}, {
+                "@type": "Clip",
+                url: "".concat(url, "#t=").concat(item.startOffset)
+              });
+            });
+            var durationIso8601 = "PT".concat(duration, "S");
+            var microdata = [{
+              "@context": "http://schema.org",
+              "@type": "VideoObject",
+              name: clipTitle,
+              duration: durationIso8601,
+              // uploadDate,      // example: "2021-10-14T15:48:27-04:00"
+              // thumbnailUrl,    // example: "https://devi.vimeocdn.com/video/1380639859-9df58541320b88aac3ab6b800818ebcdf85a309b6f5bfb62826a744d77f8f3c8-d"
+              // description,     // example: "This is a generic description"
+              // embedUrl,        // example:  "https://player.vimeo.com/video/681136954?h=89af4defaa",
+              hasPart: hasPart
+            }];
+            var structuredDataText = JSON.stringify(microdata);
+            var s = document.createElement("script");
+            s.setAttribute("type", "application/ld+json");
+            s.textContent = structuredDataText;
+            document.head.appendChild(s);
+          }
+        });
+      };
+
+      addKeyMomentsMicrodata();
       return this;
     }
     /**
