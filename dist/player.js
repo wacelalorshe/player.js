@@ -1381,14 +1381,7 @@
         };
 
         screenfull.on('fullscreenchange', this.fullscreenchangeHandler);
-      }
-      /*
-      The Google documentation for SEO says that we can dynamically insert
-      structured data into a page. We can leverage this to add key moments
-      (chapters) structured data to the *parent* page that contains our
-      iframe.
-      https://developers.google.com/search/docs/advanced/structured-data/generate-structured-data-with-javascript#custom-javascript
-      */
+      } // DETERMINE WHERE, IF NOT player.js, THIS METHOD SHOULD RESIDE
 
 
       var addKeyMomentsMicrodata = function addKeyMomentsMicrodata() {
@@ -1400,23 +1393,24 @@
 
         var titleProm = _this.getVideoTitle();
 
-        var idProm = _this.getVideoId();
+        var descriptionProm = _this.getVideoDescription();
 
-        npo_src.all([durationProm, chaptersProm, titleProm, idProm]).then(function (values) {
+        npo_src.all([durationProm, chaptersProm, titleProm, descriptionProm]).then(function (values) {
           var _values = _slicedToArray(values, 4),
               duration = _values[0],
               allChapters = _values[1],
               clipTitle = _values[2],
-              id = _values[3];
+              clipDescription = _values[3]; // Clips may have chapter start times that are greater than the clip duration
+          // if author re-uploads their video. We filter out these unused chapters
+
 
           var chapters = allChapters.filter(function (ch) {
             return ch.startTime < duration;
-          });
-          var numChapters = chapters.length;
+          }); // Clips must be at least 30 seconds long to leverage Google key moments SEO
 
-          if (duration >= MIN_DURATION && numChapters > 0) {
+          if (duration >= MIN_DURATION && chapters.length > 0) {
             var chaptersList = chapters.map(function (ch, i) {
-              var endOffset = i < numChapters - 1 ? chapters[i + 1].startTime : duration;
+              var endOffset = i < chapters.length - 1 ? chapters[i + 1].startTime : duration;
               return {
                 name: ch.title,
                 startOffset: ch.startTime,
@@ -1425,31 +1419,36 @@
             });
             var href = window.location.href;
             var lastIndex = href.length - 1;
-            var url = href.lastIndexOf("/") === lastIndex ? href.substring(0, lastIndex) : href;
+            var url = href.lastIndexOf('/') === lastIndex ? href.substring(0, lastIndex) : href;
             var hasPart = chaptersList.map(function (item) {
               return _objectSpread2(_objectSpread2({}, item), {}, {
-                "@type": "Clip",
+                '@type': 'Clip',
                 url: "".concat(url, "#t=").concat(item.startOffset)
               });
             });
             var durationIso8601 = "PT".concat(duration, "S");
             var microdata = [{
-              "@context": "http://schema.org",
-              "@type": "VideoObject",
-              name: clipTitle,
-              duration: durationIso8601,
-              // uploadDate,      // example: "2021-10-14T15:48:27-04:00"
-              // thumbnailUrl,    // example: "https://devi.vimeocdn.com/video/1380639859-9df58541320b88aac3ab6b800818ebcdf85a309b6f5bfb62826a744d77f8f3c8-d"
-              // description,     // example: "This is a generic description"
-              // embedUrl,        // example:  "https://player.vimeo.com/video/681136954?h=89af4defaa",
+              '@context': 'http://schema.org',
+              '@type': 'VideoObject',
+              'name': clipTitle,
+              'duration': durationIso8601,
+              'description': clipDescription,
+              // uploadDate,      // example: '2021-10-14T15:48:27-04:00'
+              // thumbnailUrl,    // example: 'https://devi.vimeocdn.com/video/1380639859-9df58541320b88aac3ab6b800818ebcdf85a309b6f5bfb62826a744d77f8f3c8-d'
+              // description,     // example: 'This is a generic description'
+              // embedUrl,        // example:  'https://player.vimeo.com/video/681136954?h=89af4defaa',
               hasPart: hasPart
             }];
-            var structuredDataText = JSON.stringify(microdata);
-            var s = document.createElement("script");
-            s.setAttribute("type", "application/ld+json");
-            s.textContent = structuredDataText;
+            var structuredDataRawText = JSON.stringify(microdata);
+            var s = document.createElement('script');
+            s.setAttribute('type', 'application/ld+json');
+            s.textContent = structuredDataRawText;
             document.head.appendChild(s);
           }
+
+          return;
+        }).catch(function (error) {
+          console.error(error.message);
         });
       };
 
@@ -2582,6 +2581,24 @@
       key: "getVideoTitle",
       value: function getVideoTitle() {
         return this.get('videoTitle');
+      }
+      /**
+       * A promise to get the description of the video.
+       *
+       * @promise GetVideoDescriptionPromise
+       * @fulfill {string} The description of the video.
+       */
+
+      /**
+       * Get the description of the video.
+       *
+       * @return {GetVideoDescriptionPromise}
+       */
+
+    }, {
+      key: "getVideoDescription",
+      value: function getVideoDescription() {
+        return this.get('videoDescription');
       }
       /**
        * A promise to get the native width of the video.

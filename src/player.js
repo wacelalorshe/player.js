@@ -147,35 +147,32 @@ class Player {
             screenfull.on('fullscreenchange', this.fullscreenchangeHandler);
         }
 
-        /*
-        The Google documentation for SEO says that we can dynamically insert
-        structured data into a page. We can leverage this to add key moments
-        (chapters) structured data to the *parent* page that contains our
-        iframe.
-        https://developers.google.com/search/docs/advanced/structured-data/generate-structured-data-with-javascript#custom-javascript
-        */
+        // DETERMINE WHERE, IF NOT player.js, THIS METHOD SHOULD RESIDE
         const addKeyMomentsMicrodata = () => {
             const MIN_DURATION = 30;
             const durationProm = this.getDuration();
             const chaptersProm = this.getChapters();
             const titleProm = this.getVideoTitle();
-            // const idProm = this.getVideoId();
+            const descriptionProm = this.getVideoDescription();
 
             Promise.all([
                 durationProm,
                 chaptersProm,
-                titleProm
-                // idProm
+                titleProm,
+                descriptionProm,
             ]).then((values) => {
-                const [duration, allChapters, clipTitle] = values;
+                const [duration, allChapters, clipTitle, clipDescription] = values;
+
+                // Clips may have chapter start times that are greater than the clip duration
+                // if author re-uploads their video. We filter out these unused chapters
                 const chapters = allChapters.filter(
                     (ch) => ch.startTime < duration
                 );
 
-                const numChapters = chapters.length;
-                if (duration >= MIN_DURATION && numChapters > 0) {
+                // Clips must be at least 30 seconds long to leverage Google key moments SEO
+                if (duration >= MIN_DURATION && chapters.length > 0) {
                     const chaptersList = chapters.map((ch, i) => {
-                        const endOffset = i < numChapters - 1 ? chapters[i + 1].startTime : duration;
+                        const endOffset = i < chapters.length - 1 ? chapters[i + 1].startTime : duration;
                         return {
                             name: ch.title,
                             startOffset: ch.startTime,
@@ -188,10 +185,13 @@ class Player {
                     const url = href.lastIndexOf('/') === lastIndex ? href.substring(0, lastIndex) : href;
 
                     const hasPart = chaptersList.map((item) => {
-                        Object.defineProperties(item, { '@type': 'Clip', 'url': `${url}#t=${item.startOffset}` });
-
-                        return item;
+                        return {
+                            ...item,
+                            '@type': 'Clip',
+                            url: `${url}#t=${item.startOffset}`,
+                        };
                     });
+
                     const durationIso8601 = `PT${duration}S`;
 
                     const microdata = [
@@ -200,18 +200,19 @@ class Player {
                             '@type': 'VideoObject',
                             'name': clipTitle,
                             'duration': durationIso8601,
+                            'description': clipDescription,
                             // uploadDate,      // example: '2021-10-14T15:48:27-04:00'
                             // thumbnailUrl,    // example: 'https://devi.vimeocdn.com/video/1380639859-9df58541320b88aac3ab6b800818ebcdf85a309b6f5bfb62826a744d77f8f3c8-d'
                             // description,     // example: 'This is a generic description'
                             // embedUrl,        // example:  'https://player.vimeo.com/video/681136954?h=89af4defaa',
-                            hasPart
+                            hasPart,
                         }
                     ];
-
-                    const structuredDataText = JSON.stringify(microdata);
+                    
+                    const structuredDataRawText = JSON.stringify(microdata);
                     const s = document.createElement('script');
                     s.setAttribute('type', 'application/ld+json');
-                    s.textContent = structuredDataText;
+                    s.textContent = structuredDataRawText;
                     document.head.appendChild(s);
                 }
 
@@ -1193,6 +1194,21 @@ class Player {
      */
     getVideoTitle() {
         return this.get('videoTitle');
+    }
+
+    /**
+     * A promise to get the description of the video.
+     *
+     * @promise GetVideoDescriptionPromise
+     * @fulfill {string} The description of the video.
+     */
+    /**
+     * Get the description of the video.
+     *
+     * @return {GetVideoDescriptionPromise}
+     */
+    getVideoDescription() {
+        return this.get('videoDescription');
     }
 
     /**
