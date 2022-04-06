@@ -147,22 +147,60 @@ class Player {
             screenfull.on('fullscreenchange', this.fullscreenchangeHandler);
         }
 
-        // DETERMINE WHERE, IF NOT player.js, THIS METHOD SHOULD RESIDE
-        const addKeyMomentsMicrodata = () => {
+        // TODO: NEED TO DETERMINE
+        // * WHERE addClipMarkup SHOULD BE DEFINED, IF NOT INSIDE player.jS
+        // * IF addClipMarkup SHOULD BE CALLED ALWAYS, OR BASED ON SOME CONDITION
+        const addClipMarkup = () => {
             const MIN_DURATION = 30;
+            const vimeoDefaultThumbnail = 'https://i.vimeocdn.com/portrait/default';
+
             const durationProm = this.getDuration();
             const chaptersProm = this.getChapters();
             const titleProm = this.getVideoTitle();
             const descriptionProm = this.getVideoDescription();
+            const uploadDateProm = this.getVideoUploadDate();
+            const ownerProm = this.getVideoOwner();
+            const embedUrlProm = this.getVideoEmbedUrl();
+            const thumbsBaseUrlProm = this.getVideoThumbsBaseUrl();
 
             Promise.all([
                 durationProm,
                 chaptersProm,
                 titleProm,
                 descriptionProm,
+                uploadDateProm,
+                ownerProm,
+                embedUrlProm,
+                thumbsBaseUrlProm,
             ]).then((values) => {
-                const [duration, allChapters, clipTitle, clipDescription] = values;
+                const [
+                    duration,
+                    allChapters,
+                    title,
+                    videoDescription,
+                    uploadDate,
+                    owner,
+                    embedUrl,
+                    thumbsBaseUrl,
+                ] = values;
+                const durationIso8601 = `PT${duration}S`;
+                const description = (videoDescription.trim().length)
+                    ? videoDescription
+                    : `This is \"${title}\" by ${owner} on Vimeo, the home for high quality videos and the people who love them.`;
+                
+                const thumbnailUrl = thumbsBaseUrl ? `${thumbsBaseUrl}_640` : vimeoDefaultThumbnail;
 
+                const microdata = {
+                    '@context': 'http://schema.org',
+                    '@type': 'VideoObject',
+                    name: title,
+                    duration: durationIso8601,
+                    description: description,
+                    uploadDate: uploadDate,
+                    embedUrl: embedUrl,
+                    thumbnailUrl,
+                }
+                
                 // Clips may have chapter start times that are greater than the clip duration
                 // if author re-uploads their video. We filter out these unused chapters
                 const chapters = allChapters.filter(
@@ -192,29 +230,14 @@ class Player {
                         };
                     });
 
-                    const durationIso8601 = `PT${duration}S`;
-
-                    const microdata = [
-                        {
-                            '@context': 'http://schema.org',
-                            '@type': 'VideoObject',
-                            'name': clipTitle,
-                            'duration': durationIso8601,
-                            'description': clipDescription,
-                            // uploadDate,      // example: '2021-10-14T15:48:27-04:00'
-                            // thumbnailUrl,    // example: 'https://devi.vimeocdn.com/video/1380639859-9df58541320b88aac3ab6b800818ebcdf85a309b6f5bfb62826a744d77f8f3c8-d'
-                            // description,     // example: 'This is a generic description'
-                            // embedUrl,        // example:  'https://player.vimeo.com/video/681136954?h=89af4defaa',
-                            hasPart,
-                        }
-                    ];
-                    
-                    const structuredDataRawText = JSON.stringify(microdata);
-                    const s = document.createElement('script');
-                    s.setAttribute('type', 'application/ld+json');
-                    s.textContent = structuredDataRawText;
-                    document.head.appendChild(s);
+                    microdata.hasPart = hasPart;
                 }
+
+                const structuredDataRawText = JSON.stringify([microdata]);
+                const s = document.createElement('script');
+                s.setAttribute('type', 'application/ld+json');
+                s.textContent = structuredDataRawText;
+                document.head.appendChild(s);
 
                 return;
             })
@@ -223,7 +246,7 @@ class Player {
                 });
         };
 
-        addKeyMomentsMicrodata();
+        addClipMarkup();
 
         return this;
     }
@@ -1209,6 +1232,66 @@ class Player {
      */
     getVideoDescription() {
         return this.get('videoDescription');
+    }
+
+    /**
+     * A promise to get the upload date of the video.
+     *
+     * @promise GetVideoUploadDatePromise
+     * @fulfill {string} The upload date of the video.
+     */
+    /**
+     * Get the upload date of the video.
+     *
+     * @return {GetVideoUploadDatePromise}
+     */
+    getVideoUploadDate() {
+        return this.get('videoUploadDate');
+    }
+
+    /**
+     * A promise to get name of the video's owner.
+     *
+     * @promise GetVideoOwnerPromise
+     * @fulfill {string} The name of the video's owner.
+     */
+    /**
+     * Get the name of the video's owner.
+     *
+     * @return {GetVideoOwnerPromise}
+     */
+    getVideoOwner() {
+        return this.get('videoOwner');
+    }
+
+    /**
+     * A promise to get the embed url for the video.
+     *
+     * @promise GetVideoEmbedUrlPromise
+     * @fulfill {string} The embed url for the video.
+     */
+    /**
+     * Get the embed url for the video.
+     *
+     * @return {GetVideoEmbedUrlPromise}
+     */
+     getVideoEmbedUrl() {
+        return this.get('videoEmbedUrl');
+    }
+
+    /**
+     * A promise to get the video's base thumbnail url.
+     *
+     * @promise GetVideoThumbsBaseUrlPromise
+     * @fulfill {string} The base thumbnail url for the video.
+     */
+    /**
+     * Get the base thumbnail url for the video.
+     *
+     * @return {GetVideoThumbsBaseUrlPromise}
+     */
+     getVideoThumbsBaseUrl() {
+        return this.get('videoThumbsBaseUrl');
     }
 
     /**
