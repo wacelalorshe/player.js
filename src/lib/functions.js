@@ -91,3 +91,85 @@ export function getVimeoUrl(oEmbedParameters = {}) {
 
     throw new TypeError(`“${idOrUrl}” is not a vimeo.com url.`);
 }
+
+// TODO: NEED TO DETERMINE WHERE addClipMarkup SHOULD BE DEFINED, IF NOT HERE
+export function addClipMarkup(player) {
+    if (!player) {
+        return;
+    }
+
+    const vimeoDefaultThumbnail = 'https://i.vimeocdn.com/portrait/default';
+    const MIN_DURATION = 30;
+
+    player.getVideoObjectMetadata()
+        .then((metadata) => {
+            if (!metadata) {
+                return;
+            }
+
+            const {
+                author,
+                chapters,
+                description: clipDescription,
+                duration,
+                embedUrl,
+                thumbsBaseUrl,
+                title,
+                uploadDate
+            } = metadata;
+            const durationIso8601 = `PT${duration}S`;
+            const description = (clipDescription.trim().length)
+                ? clipDescription
+                : `This is "${title}" by ${author} on Vimeo, the home for high quality videos and the people who love them.`;
+            
+            const thumbnailUrl = thumbsBaseUrl ? `${thumbsBaseUrl}_640` : vimeoDefaultThumbnail;
+
+            const microdata = {
+                '@context': 'http://schema.org',
+                '@type': 'VideoObject',
+                name: title,
+                duration: durationIso8601,
+                description,
+                uploadDate: uploadDate,
+                embedUrl: embedUrl,
+                thumbnailUrl,
+            }
+            
+            // Clips must be at least 30 seconds long to leverage Key Moments moments rich results
+            if (chapters.length > 0 && duration > MIN_DURATION) {
+                const chaptersList = chapters.map((ch, i) => {
+                    const endOffset = i < chapters.length - 1 ? chapters[i + 1].startTime : duration;
+                    return {
+                        name: ch.title,
+                        startOffset: ch.startTime,
+                        endOffset
+                    };
+                });
+
+                const { href } = window.location;
+                const lastIndex = href.length - 1;
+                const url = href.lastIndexOf('/') === lastIndex ? href.substring(0, lastIndex) : href;
+
+                const hasPart = chaptersList.map((item) => {
+                    return {
+                        ...item,
+                        '@type': 'Clip',
+                        url: `${url}#t=${item.startOffset}`,
+                    };
+                });
+
+                microdata.hasPart = hasPart;
+            }
+
+            const structuredDataRawText = JSON.stringify([microdata]);
+            const s = document.createElement('script');
+            s.setAttribute('type', 'application/ld+json');
+            s.textContent = structuredDataRawText;
+            document.head.appendChild(s);
+
+            return;
+        })
+        .catch((error) => {
+            console.error(error.message);
+        });
+};

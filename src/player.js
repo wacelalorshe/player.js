@@ -4,7 +4,7 @@ import 'weakmap-polyfill';
 import Promise from 'native-promise-only';
 
 import { storeCallback, getCallbacks, removeCallback, swapCallbacks } from './lib/callbacks';
-import { getMethodName, isDomElement, isVimeoUrl, getVimeoUrl, isNode } from './lib/functions';
+import { addClipMarkup, getMethodName, isDomElement, isVimeoUrl, getVimeoUrl, isNode, addClipMarkup2 } from './lib/functions';
 import { getOEmbedParameters, getOEmbedData, createEmbed, initializeEmbeds, resizeEmbeds } from './lib/embed';
 import { parseMessageData, postMessage, processData } from './lib/postmessage';
 import { initializeScreenfull } from './lib/screenfull.js';
@@ -148,105 +148,10 @@ class Player {
         }
 
         // TODO: NEED TO DETERMINE
-        // * WHERE addClipMarkup SHOULD BE DEFINED, IF NOT INSIDE player.jS
-        // * IF addClipMarkup SHOULD BE CALLED ALWAYS, OR BASED ON SOME CONDITION
-        const addClipMarkup = () => {
-            const MIN_DURATION = 30;
-            const vimeoDefaultThumbnail = 'https://i.vimeocdn.com/portrait/default';
-
-            const durationProm = this.getDuration();
-            const chaptersProm = this.getChapters();
-            const titleProm = this.getVideoTitle();
-            const descriptionProm = this.getVideoDescription();
-            const uploadDateProm = this.getVideoUploadDate();
-            const ownerProm = this.getVideoOwner();
-            const embedUrlProm = this.getVideoEmbedUrl();
-            const thumbsBaseUrlProm = this.getVideoThumbsBaseUrl();
-
-            Promise.all([
-                durationProm,
-                chaptersProm,
-                titleProm,
-                descriptionProm,
-                uploadDateProm,
-                ownerProm,
-                embedUrlProm,
-                thumbsBaseUrlProm,
-            ]).then((values) => {
-                const [
-                    duration,
-                    allChapters,
-                    title,
-                    videoDescription,
-                    uploadDate,
-                    owner,
-                    embedUrl,
-                    thumbsBaseUrl,
-                ] = values;
-                const durationIso8601 = `PT${duration}S`;
-                const description = (videoDescription.trim().length)
-                    ? videoDescription
-                    : `This is \"${title}\" by ${owner} on Vimeo, the home for high quality videos and the people who love them.`;
-                
-                const thumbnailUrl = thumbsBaseUrl ? `${thumbsBaseUrl}_640` : vimeoDefaultThumbnail;
-
-                const microdata = {
-                    '@context': 'http://schema.org',
-                    '@type': 'VideoObject',
-                    name: title,
-                    duration: durationIso8601,
-                    description: description,
-                    uploadDate: uploadDate,
-                    embedUrl: embedUrl,
-                    thumbnailUrl,
-                }
-                
-                // Clips may have chapter start times that are greater than the clip duration
-                // if author re-uploads their video. We filter out these unused chapters
-                const chapters = allChapters.filter(
-                    (ch) => ch.startTime < duration
-                );
-
-                // Clips must be at least 30 seconds long to leverage Google key moments SEO
-                if (duration >= MIN_DURATION && chapters.length > 0) {
-                    const chaptersList = chapters.map((ch, i) => {
-                        const endOffset = i < chapters.length - 1 ? chapters[i + 1].startTime : duration;
-                        return {
-                            name: ch.title,
-                            startOffset: ch.startTime,
-                            endOffset
-                        };
-                    });
-
-                    const { href } = window.location;
-                    const lastIndex = href.length - 1;
-                    const url = href.lastIndexOf('/') === lastIndex ? href.substring(0, lastIndex) : href;
-
-                    const hasPart = chaptersList.map((item) => {
-                        return {
-                            ...item,
-                            '@type': 'Clip',
-                            url: `${url}#t=${item.startOffset}`,
-                        };
-                    });
-
-                    microdata.hasPart = hasPart;
-                }
-
-                const structuredDataRawText = JSON.stringify([microdata]);
-                const s = document.createElement('script');
-                s.setAttribute('type', 'application/ld+json');
-                s.textContent = structuredDataRawText;
-                document.head.appendChild(s);
-
-                return;
-            })
-                .catch((error) => {
-                    console.error(error.message);
-                });
-        };
-
-        addClipMarkup();
+        // 1  IF addClipMarkup CAN BE CALLED FROM HERE AND
+        // 2  WHETHER addClipMarkup SHOULD ALWAYS BE CALLED WHEN A
+        //    CLIP IS PUBLIC, OR BASED ON SOME ADDITIONAL CONDITIONS
+        addClipMarkup(this);
 
         return this;
     }
@@ -1217,81 +1122,21 @@ class Player {
      */
     getVideoTitle() {
         return this.get('videoTitle');
-    }
+    }    
 
     /**
-     * A promise to get the description of the video.
+     * A promise to get the video's VideoObject metadata.
      *
-     * @promise GetVideoDescriptionPromise
-     * @fulfill {string} The description of the video.
+     * @promise GetVideoObjectmetadataPromise
+     * @fulfill {object} The VideoObject metadata for the video.
      */
     /**
-     * Get the description of the video.
+     * Get the VideoObject metadata for the video.
      *
-     * @return {GetVideoDescriptionPromise}
+     * @return {GetVideoObjectmetadataPromise}
      */
-    getVideoDescription() {
-        return this.get('videoDescription');
-    }
-
-    /**
-     * A promise to get the upload date of the video.
-     *
-     * @promise GetVideoUploadDatePromise
-     * @fulfill {string} The upload date of the video.
-     */
-    /**
-     * Get the upload date of the video.
-     *
-     * @return {GetVideoUploadDatePromise}
-     */
-    getVideoUploadDate() {
-        return this.get('videoUploadDate');
-    }
-
-    /**
-     * A promise to get name of the video's owner.
-     *
-     * @promise GetVideoOwnerPromise
-     * @fulfill {string} The name of the video's owner.
-     */
-    /**
-     * Get the name of the video's owner.
-     *
-     * @return {GetVideoOwnerPromise}
-     */
-    getVideoOwner() {
-        return this.get('videoOwner');
-    }
-
-    /**
-     * A promise to get the embed url for the video.
-     *
-     * @promise GetVideoEmbedUrlPromise
-     * @fulfill {string} The embed url for the video.
-     */
-    /**
-     * Get the embed url for the video.
-     *
-     * @return {GetVideoEmbedUrlPromise}
-     */
-     getVideoEmbedUrl() {
-        return this.get('videoEmbedUrl');
-    }
-
-    /**
-     * A promise to get the video's base thumbnail url.
-     *
-     * @promise GetVideoThumbsBaseUrlPromise
-     * @fulfill {string} The base thumbnail url for the video.
-     */
-    /**
-     * Get the base thumbnail url for the video.
-     *
-     * @return {GetVideoThumbsBaseUrlPromise}
-     */
-     getVideoThumbsBaseUrl() {
-        return this.get('videoThumbsBaseUrl');
+    getVideoObjectMetadata() {
+        return this.get('videoObjectMetadata');
     }
 
     /**
