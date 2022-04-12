@@ -4,7 +4,7 @@ import 'weakmap-polyfill';
 import Promise from 'native-promise-only';
 
 import { storeCallback, getCallbacks, removeCallback, swapCallbacks } from './lib/callbacks';
-import { addClipMarkup, getMethodName, isDomElement, isVimeoUrl, getVimeoUrl, isNode, addClipMarkup2 } from './lib/functions';
+import { addClipMarkup, getMethodName, isDomElement, isVimeoUrl, getVimeoUrl, isNode } from './lib/functions';
 import { getOEmbedParameters, getOEmbedData, createEmbed, initializeEmbeds, resizeEmbeds } from './lib/embed';
 import { parseMessageData, postMessage, processData } from './lib/postmessage';
 import { initializeScreenfull } from './lib/screenfull.js';
@@ -149,8 +149,7 @@ class Player {
 
         // TODO: NEED TO DETERMINE
         // 1  IF addClipMarkup CAN BE CALLED FROM HERE AND
-        // 2  WHETHER addClipMarkup SHOULD ALWAYS BE CALLED WHEN A
-        //    CLIP IS PUBLIC, OR BASED ON SOME ADDITIONAL CONDITIONS
+        // 2  WHETHER WE SHOULD ONLY CALL addClipMarkup CONDITIONALLY
         addClipMarkup(this);
 
         return this;

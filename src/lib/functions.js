@@ -95,18 +95,32 @@ export function getVimeoUrl(oEmbedParameters = {}) {
 // TODO: NEED TO DETERMINE WHERE addClipMarkup SHOULD BE DEFINED, IF NOT HERE
 export function addClipMarkup(player) {
     if (!player) {
-        return;
+       return;
     }
 
-    const vimeoDefaultThumbnail = 'https://i.vimeocdn.com/portrait/default';
-    const MIN_DURATION = 30;
+    // Any off-site page may have multiple embedded Vimeo videos. We
+    // can inject VideoObject markup for each video. According to the
+    // Google SEO team, we should include 'chapters' data for only
+    // one of the videos
+
+    const scriptElem = document.querySelector("script[type='application/ld+json']");
+    let existingMicrodataHasChapters;
+    let existingMicrodata = [];
+
+    if (scriptElem) {
+        const temp = JSON.parse(scriptElem.textContent);
+        existingMicrodata = Array.isArray(temp) ? temp.slice() : new Array(temp);
+        existingMicrodataHasChapters = existingMicrodata.some(item => item.hasOwnProperty('hasPart'));
+    }
 
     player.getVideoObjectMetadata()
-        .then((metadata) => {
-            if (!metadata) {
+        .then((data) => {        
+            if (!data) {
                 return;
             }
 
+            const defaultThumbnail = 'https://i.vimeocdn.com/portrait/default';
+            const MIN_DURATION = 30;
             const {
                 author,
                 chapters,
@@ -116,13 +130,12 @@ export function addClipMarkup(player) {
                 thumbsBaseUrl,
                 title,
                 uploadDate
-            } = metadata;
+            } = data;
             const durationIso8601 = `PT${duration}S`;
+            const thumbnailUrl = thumbsBaseUrl ? `${thumbsBaseUrl}_640` : defaultThumbnail;
             const description = (clipDescription.trim().length)
                 ? clipDescription
                 : `This is "${title}" by ${author} on Vimeo, the home for high quality videos and the people who love them.`;
-            
-            const thumbnailUrl = thumbsBaseUrl ? `${thumbsBaseUrl}_640` : vimeoDefaultThumbnail;
 
             const microdata = {
                 '@context': 'http://schema.org',
@@ -136,7 +149,7 @@ export function addClipMarkup(player) {
             }
             
             // Clips must be at least 30 seconds long to leverage Key Moments moments rich results
-            if (chapters.length > 0 && duration > MIN_DURATION) {
+            if (chapters.length > 0 && duration > MIN_DURATION && !existingMicrodataHasChapters) {
                 const chaptersList = chapters.map((ch, i) => {
                     const endOffset = i < chapters.length - 1 ? chapters[i + 1].startTime : duration;
                     return {
@@ -147,25 +160,28 @@ export function addClipMarkup(player) {
                 });
 
                 const { href } = window.location;
-                const lastIndex = href.length - 1;
-                const url = href.lastIndexOf('/') === lastIndex ? href.substring(0, lastIndex) : href;
-
-                const hasPart = chaptersList.map((item) => {
+                const hasPart = chaptersList.map((chapter) => {
+                    const url = new URL(href);
+                    url.searchParams.append('vimeo_t', chapter.startOffset);
                     return {
-                        ...item,
+                        ...chapter,
                         '@type': 'Clip',
-                        url: `${url}#t=${item.startOffset}`,
+                        url: url.href
                     };
                 });
 
                 microdata.hasPart = hasPart;
             }
 
-            const structuredDataRawText = JSON.stringify([microdata]);
-            const s = document.createElement('script');
-            s.setAttribute('type', 'application/ld+json');
-            s.textContent = structuredDataRawText;
-            document.head.appendChild(s);
+            if (scriptElem) {
+                scriptElem.textContent = JSON.stringify([...existingMicrodata, microdata]);
+            } else {
+                const structuredDataRawText = JSON.stringify([microdata]);
+                const newScriptElem = document.createElement('script');
+                newScriptElem.setAttribute('type', 'application/ld+json');
+                newScriptElem.textContent = structuredDataRawText;
+                document.head.appendChild(newScriptElem);
+            }
 
             return;
         })

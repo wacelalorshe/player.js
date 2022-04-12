@@ -76,6 +76,39 @@
     return target;
   }
 
+  function _toConsumableArray(arr) {
+    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
+  }
+
+  function _arrayWithoutHoles(arr) {
+    if (Array.isArray(arr)) return _arrayLikeToArray(arr);
+  }
+
+  function _iterableToArray(iter) {
+    if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+  }
+
+  function _unsupportedIterableToArray(o, minLen) {
+    if (!o) return;
+    if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+    var n = Object.prototype.toString.call(o).slice(8, -1);
+    if (n === "Object" && o.constructor) n = o.constructor.name;
+    if (n === "Map" || n === "Set") return Array.from(o);
+    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+  }
+
+  function _arrayLikeToArray(arr, len) {
+    if (len == null || len > arr.length) len = arr.length;
+
+    for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+
+    return arr2;
+  }
+
+  function _nonIterableSpread() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+
   /**
    * @module lib/functions
    */
@@ -171,26 +204,42 @@
   function addClipMarkup(player) {
     if (!player) {
       return;
+    } // Any off-site page may have multiple embedded Vimeo videos. We
+    // can inject VideoObject markup for each video. According to the
+    // Google SEO team, we should include 'chapters' data for only
+    // one of the videos
+
+
+    var scriptElem = document.querySelector("script[type='application/ld+json']");
+    var existingMicrodataHasChapters;
+    var existingMicrodata = [];
+
+    if (scriptElem) {
+      var temp = JSON.parse(scriptElem.textContent);
+      existingMicrodata = Array.isArray(temp) ? temp.slice() : new Array(temp);
+      existingMicrodataHasChapters = existingMicrodata.some(function (item) {
+        return item.hasOwnProperty('hasPart');
+      });
     }
 
-    var vimeoDefaultThumbnail = 'https://i.vimeocdn.com/portrait/default';
-    var MIN_DURATION = 30;
-    player.getVideoObjectMetadata().then(function (metadata) {
-      if (!metadata) {
+    player.getVideoObjectMetadata().then(function (data) {
+      if (!data) {
         return;
       }
 
-      var author = metadata.author,
-          chapters = metadata.chapters,
-          clipDescription = metadata.description,
-          duration = metadata.duration,
-          embedUrl = metadata.embedUrl,
-          thumbsBaseUrl = metadata.thumbsBaseUrl,
-          title = metadata.title,
-          uploadDate = metadata.uploadDate;
+      var defaultThumbnail = 'https://i.vimeocdn.com/portrait/default';
+      var MIN_DURATION = 30;
+      var author = data.author,
+          chapters = data.chapters,
+          clipDescription = data.description,
+          duration = data.duration,
+          embedUrl = data.embedUrl,
+          thumbsBaseUrl = data.thumbsBaseUrl,
+          title = data.title,
+          uploadDate = data.uploadDate;
       var durationIso8601 = "PT".concat(duration, "S");
+      var thumbnailUrl = thumbsBaseUrl ? "".concat(thumbsBaseUrl, "_640") : defaultThumbnail;
       var description = clipDescription.trim().length ? clipDescription : "This is \"".concat(title, "\" by ").concat(author, " on Vimeo, the home for high quality videos and the people who love them.");
-      var thumbnailUrl = thumbsBaseUrl ? "".concat(thumbsBaseUrl, "_640") : vimeoDefaultThumbnail;
       var microdata = {
         '@context': 'http://schema.org',
         '@type': 'VideoObject',
@@ -202,7 +251,7 @@
         thumbnailUrl: thumbnailUrl
       }; // Clips must be at least 30 seconds long to leverage Key Moments moments rich results
 
-      if (chapters.length > 0 && duration > MIN_DURATION) {
+      if (chapters.length > 0 && duration > MIN_DURATION && !existingMicrodataHasChapters) {
         var chaptersList = chapters.map(function (ch, i) {
           var endOffset = i < chapters.length - 1 ? chapters[i + 1].startTime : duration;
           return {
@@ -212,22 +261,27 @@
           };
         });
         var href = window.location.href;
-        var lastIndex = href.length - 1;
-        var url = href.lastIndexOf('/') === lastIndex ? href.substring(0, lastIndex) : href;
-        var hasPart = chaptersList.map(function (item) {
-          return _objectSpread2(_objectSpread2({}, item), {}, {
+        var hasPart = chaptersList.map(function (chapter) {
+          var url = new URL(href);
+          url.searchParams.append('vimeo_t', chapter.startOffset);
+          return _objectSpread2(_objectSpread2({}, chapter), {}, {
             '@type': 'Clip',
-            url: "".concat(url, "#t=").concat(item.startOffset)
+            url: url.href
           });
         });
         microdata.hasPart = hasPart;
       }
 
-      var structuredDataRawText = JSON.stringify([microdata]);
-      var s = document.createElement('script');
-      s.setAttribute('type', 'application/ld+json');
-      s.textContent = structuredDataRawText;
-      document.head.appendChild(s);
+      if (scriptElem) {
+        scriptElem.textContent = JSON.stringify([].concat(_toConsumableArray(existingMicrodata), [microdata]));
+      } else {
+        var structuredDataRawText = JSON.stringify([microdata]);
+        var newScriptElem = document.createElement('script');
+        newScriptElem.setAttribute('type', 'application/ld+json');
+        newScriptElem.textContent = structuredDataRawText;
+        document.head.appendChild(newScriptElem);
+      }
+
       return;
     }).catch(function (error) {
       console.error(error.message);
@@ -1393,8 +1447,7 @@
         screenfull.on('fullscreenchange', this.fullscreenchangeHandler);
       } // TODO: NEED TO DETERMINE
       // 1  IF addClipMarkup CAN BE CALLED FROM HERE AND
-      // 2  WHETHER addClipMarkup SHOULD ALWAYS BE CALLED WHEN A
-      //    CLIP IS PUBLIC, OR BASED ON SOME ADDITIONAL CONDITIONS
+      // 2  WHETHER WE SHOULD ONLY CALL addClipMarkup CONDITIONALLY
 
 
       addClipMarkup(this);
