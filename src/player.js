@@ -1121,7 +1121,7 @@ class Player {
      */
     getVideoTitle() {
         return this.get('videoTitle');
-    }    
+    }
 
     /**
      * A promise to get the video's VideoObject metadata.

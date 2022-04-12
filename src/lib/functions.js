@@ -92,17 +92,21 @@ export function getVimeoUrl(oEmbedParameters = {}) {
     throw new TypeError(`“${idOrUrl}” is not a vimeo.com url.`);
 }
 
-// TODO: NEED TO DETERMINE WHERE addClipMarkup SHOULD BE DEFINED, IF NOT HERE
+/**
+ * Add clip-related markup to page head for Google SEO.
+ *
+ * @param {player} Player An instance of the Player.
+ * @return {void}
+ */
+// TODO: NEED TO DETERMINE WHERE THIS METHOD SHOULD BE DEFINED, IF NOT HERE
 export function addClipMarkup(player) {
     if (!player) {
-       return;
+        return;
     }
 
-    // Any off-site page may have multiple embedded Vimeo videos. We
-    // can inject VideoObject markup for each video. According to the
-    // Google SEO team, we should include 'chapters' data for only
-    // one of the videos
-
+    // Any off-site page may have multiple embedded Vimeo videos. We can inject
+    // VideoObject markup for each video. According to the Google SEO team, we
+    // should include 'chapters' data for only one video in the page
     const scriptElem = document.querySelector("script[type='application/ld+json']");
     let existingMicrodataHasChapters;
     let existingMicrodata = [];
@@ -110,48 +114,45 @@ export function addClipMarkup(player) {
     if (scriptElem) {
         const temp = JSON.parse(scriptElem.textContent);
         existingMicrodata = Array.isArray(temp) ? temp.slice() : new Array(temp);
-        existingMicrodataHasChapters = existingMicrodata.some(item => item.hasOwnProperty('hasPart'));
+        existingMicrodataHasChapters = existingMicrodata.some((item) => item.hasOwnProperty('hasPart'));
     }
 
     player.getVideoObjectMetadata()
-        .then((data) => {        
+        .then((data) => {
             if (!data) {
                 return;
             }
 
-            const defaultThumbnail = 'https://i.vimeocdn.com/portrait/default';
+            // For key moments rich results, Google requires clips to be at least 30 seconds long
             const MIN_DURATION = 30;
+            const defaultThumbnail = 'https://i.vimeocdn.com/portrait/default';
             const {
                 author,
                 chapters,
                 description: clipDescription,
-                duration,
+                duration: clipDurationSec,
                 embedUrl,
                 thumbsBaseUrl,
-                title,
+                title: name,
                 uploadDate
             } = data;
-            const durationIso8601 = `PT${duration}S`;
+            const duration = `PT${clipDurationSec}S`;
             const thumbnailUrl = thumbsBaseUrl ? `${thumbsBaseUrl}_640` : defaultThumbnail;
-            const description = (clipDescription.trim().length)
-                ? clipDescription
-                : `This is "${title}" by ${author} on Vimeo, the home for high quality videos and the people who love them.`;
-
+            const description = (clipDescription.trim().length) ? clipDescription : `This is "${title}" by ${author} on Vimeo, the home for high quality videos and the people who love them.`;
             const microdata = {
                 '@context': 'http://schema.org',
                 '@type': 'VideoObject',
-                name: title,
-                duration: durationIso8601,
+                name,
+                duration,
                 description,
-                uploadDate: uploadDate,
-                embedUrl: embedUrl,
-                thumbnailUrl,
-            }
-            
-            // Clips must be at least 30 seconds long to leverage Key Moments moments rich results
-            if (chapters.length > 0 && duration > MIN_DURATION && !existingMicrodataHasChapters) {
+                uploadDate,
+                embedUrl,
+                thumbnailUrl
+            };
+
+            if (chapters.length > 0 && clipDurationSec > MIN_DURATION && !existingMicrodataHasChapters) {
                 const chaptersList = chapters.map((ch, i) => {
-                    const endOffset = i < chapters.length - 1 ? chapters[i + 1].startTime : duration;
+                    const endOffset = i < chapters.length - 1 ? chapters[i + 1].startTime : clipDurationSec;
                     return {
                         name: ch.title,
                         startOffset: ch.startTime,
@@ -163,11 +164,12 @@ export function addClipMarkup(player) {
                 const hasPart = chaptersList.map((chapter) => {
                     const url = new URL(href);
                     url.searchParams.append('vimeo_t', chapter.startOffset);
-                    return {
-                        ...chapter,
+                    const chapterEnhanced = Object.assign(chapter, {
                         '@type': 'Clip',
-                        url: url.href
-                    };
+                        'url': url.href
+                    });
+
+                    return chapterEnhanced;
                 });
 
                 microdata.hasPart = hasPart;
@@ -175,7 +177,8 @@ export function addClipMarkup(player) {
 
             if (scriptElem) {
                 scriptElem.textContent = JSON.stringify([...existingMicrodata, microdata]);
-            } else {
+            }
+            else {
                 const structuredDataRawText = JSON.stringify([microdata]);
                 const newScriptElem = document.createElement('script');
                 newScriptElem.setAttribute('type', 'application/ld+json');
@@ -188,4 +191,4 @@ export function addClipMarkup(player) {
         .catch((error) => {
             console.error(error.message);
         });
-};
+}

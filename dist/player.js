@@ -27,55 +27,6 @@
     return Constructor;
   }
 
-  function _defineProperty(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {
-        value: value,
-        enumerable: true,
-        configurable: true,
-        writable: true
-      });
-    } else {
-      obj[key] = value;
-    }
-
-    return obj;
-  }
-
-  function ownKeys(object, enumerableOnly) {
-    var keys = Object.keys(object);
-
-    if (Object.getOwnPropertySymbols) {
-      var symbols = Object.getOwnPropertySymbols(object);
-      if (enumerableOnly) symbols = symbols.filter(function (sym) {
-        return Object.getOwnPropertyDescriptor(object, sym).enumerable;
-      });
-      keys.push.apply(keys, symbols);
-    }
-
-    return keys;
-  }
-
-  function _objectSpread2(target) {
-    for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i] != null ? arguments[i] : {};
-
-      if (i % 2) {
-        ownKeys(Object(source), true).forEach(function (key) {
-          _defineProperty(target, key, source[key]);
-        });
-      } else if (Object.getOwnPropertyDescriptors) {
-        Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
-      } else {
-        ownKeys(Object(source)).forEach(function (key) {
-          Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
-        });
-      }
-    }
-
-    return target;
-  }
-
   function _toConsumableArray(arr) {
     return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
   }
@@ -199,15 +150,21 @@
     }
 
     throw new TypeError("\u201C".concat(idOrUrl, "\u201D is not a vimeo.com url."));
-  } // TODO: NEED TO DETERMINE WHERE addClipMarkup SHOULD BE DEFINED, IF NOT HERE
+  }
+  /**
+   * Add clip-related markup to page head for Google SEO.
+   *
+   * @param {player} Player An instance of the Player.
+   * @return {void}
+   */
+  // TODO: NEED TO DETERMINE WHERE THIS METHOD SHOULD BE DEFINED, IF NOT HERE
 
   function addClipMarkup(player) {
     if (!player) {
       return;
-    } // Any off-site page may have multiple embedded Vimeo videos. We
-    // can inject VideoObject markup for each video. According to the
-    // Google SEO team, we should include 'chapters' data for only
-    // one of the videos
+    } // Any off-site page may have multiple embedded Vimeo videos. We can inject
+    // VideoObject markup for each video. According to the Google SEO team, we
+    // should include 'chapters' data for only one video in the page
 
 
     var scriptElem = document.querySelector("script[type='application/ld+json']");
@@ -225,35 +182,36 @@
     player.getVideoObjectMetadata().then(function (data) {
       if (!data) {
         return;
-      }
+      } // For key moments rich results, Google requires clips to be at least 30 seconds long
 
-      var defaultThumbnail = 'https://i.vimeocdn.com/portrait/default';
+
       var MIN_DURATION = 30;
+      var defaultThumbnail = 'https://i.vimeocdn.com/portrait/default';
       var author = data.author,
           chapters = data.chapters,
           clipDescription = data.description,
-          duration = data.duration,
+          clipDurationSec = data.duration,
           embedUrl = data.embedUrl,
           thumbsBaseUrl = data.thumbsBaseUrl,
-          title = data.title,
+          name = data.title,
           uploadDate = data.uploadDate;
-      var durationIso8601 = "PT".concat(duration, "S");
+      var duration = "PT".concat(clipDurationSec, "S");
       var thumbnailUrl = thumbsBaseUrl ? "".concat(thumbsBaseUrl, "_640") : defaultThumbnail;
       var description = clipDescription.trim().length ? clipDescription : "This is \"".concat(title, "\" by ").concat(author, " on Vimeo, the home for high quality videos and the people who love them.");
       var microdata = {
         '@context': 'http://schema.org',
         '@type': 'VideoObject',
-        name: title,
-        duration: durationIso8601,
+        name: name,
+        duration: duration,
         description: description,
         uploadDate: uploadDate,
         embedUrl: embedUrl,
         thumbnailUrl: thumbnailUrl
-      }; // Clips must be at least 30 seconds long to leverage Key Moments moments rich results
+      };
 
-      if (chapters.length > 0 && duration > MIN_DURATION && !existingMicrodataHasChapters) {
+      if (chapters.length > 0 && clipDurationSec > MIN_DURATION && !existingMicrodataHasChapters) {
         var chaptersList = chapters.map(function (ch, i) {
-          var endOffset = i < chapters.length - 1 ? chapters[i + 1].startTime : duration;
+          var endOffset = i < chapters.length - 1 ? chapters[i + 1].startTime : clipDurationSec;
           return {
             name: ch.title,
             startOffset: ch.startTime,
@@ -264,10 +222,11 @@
         var hasPart = chaptersList.map(function (chapter) {
           var url = new URL(href);
           url.searchParams.append('vimeo_t', chapter.startOffset);
-          return _objectSpread2(_objectSpread2({}, chapter), {}, {
+          var chapterEnhanced = Object.assign(chapter, {
             '@type': 'Clip',
-            url: url.href
+            'url': url.href
           });
+          return chapterEnhanced;
         });
         microdata.hasPart = hasPart;
       }
