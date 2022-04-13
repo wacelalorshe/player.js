@@ -4,10 +4,11 @@ import 'weakmap-polyfill';
 import Promise from 'native-promise-only';
 
 import { storeCallback, getCallbacks, removeCallback, swapCallbacks } from './lib/callbacks';
-import { addClipMarkup, getMethodName, isDomElement, isVimeoUrl, getVimeoUrl, isNode } from './lib/functions';
+import { getMethodName, isDomElement, isVimeoUrl, getVimeoUrl, isNode } from './lib/functions';
 import { getOEmbedParameters, getOEmbedData, createEmbed, initializeEmbeds, resizeEmbeds } from './lib/embed';
 import { parseMessageData, postMessage, processData } from './lib/postmessage';
 import { initializeScreenfull } from './lib/screenfull.js';
+import { addClipMarkup } from './lib/addClipMarkup';
 
 const playerMap = new WeakMap();
 const readyMap = new WeakMap();

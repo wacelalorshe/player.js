@@ -145,101 +145,6 @@ function getVimeoUrl() {
 
   throw new TypeError("\u201C".concat(idOrUrl, "\u201D is not a vimeo.com url."));
 }
-/**
- * Add clip-related markup to page head for Google SEO.
- *
- * @param {player} Player An instance of the Player.
- * @return {void}
- */
-// TODO: NEED TO DETERMINE WHERE THIS METHOD SHOULD BE DEFINED, IF NOT HERE
-
-function addClipMarkup(player) {
-  if (!player) {
-    return;
-  } // Any off-site page may have multiple embedded Vimeo videos. We can inject
-  // VideoObject markup for each video. According to the Google SEO team, we
-  // should include 'chapters' data for only one video in the page
-
-
-  var scriptElem = document.querySelector("script[type='application/ld+json']");
-  var existingMicrodataHasChapters;
-  var existingMicrodata = [];
-
-  if (scriptElem) {
-    var temp = JSON.parse(scriptElem.textContent);
-    existingMicrodata = Array.isArray(temp) ? temp.slice() : new Array(temp);
-    existingMicrodataHasChapters = existingMicrodata.some(function (item) {
-      return item.hasOwnProperty('hasPart');
-    });
-  }
-
-  player.getVideoObjectMetadata().then(function (data) {
-    if (!data) {
-      return;
-    } // For key moments rich results, Google requires clips to be at least 30 seconds long
-
-
-    var MIN_DURATION = 30;
-    var defaultThumbnail = 'https://i.vimeocdn.com/portrait/default';
-    var author = data.author,
-        chapters = data.chapters,
-        clipDescription = data.description,
-        clipDurationSec = data.duration,
-        embedUrl = data.embedUrl,
-        thumbsBaseUrl = data.thumbsBaseUrl,
-        name = data.title,
-        uploadDate = data.uploadDate;
-    var duration = "PT".concat(clipDurationSec, "S");
-    var thumbnailUrl = thumbsBaseUrl ? "".concat(thumbsBaseUrl, "_640") : defaultThumbnail;
-    var description = clipDescription.trim().length ? clipDescription : "This is \"".concat(title, "\" by ").concat(author, " on Vimeo, the home for high quality videos and the people who love them.");
-    var microdata = {
-      '@context': 'http://schema.org',
-      '@type': 'VideoObject',
-      name: name,
-      duration: duration,
-      description: description,
-      uploadDate: uploadDate,
-      embedUrl: embedUrl,
-      thumbnailUrl: thumbnailUrl
-    };
-
-    if (chapters.length > 0 && clipDurationSec > MIN_DURATION && !existingMicrodataHasChapters) {
-      var chaptersList = chapters.map(function (ch, i) {
-        var endOffset = i < chapters.length - 1 ? chapters[i + 1].startTime : clipDurationSec;
-        return {
-          name: ch.title,
-          startOffset: ch.startTime,
-          endOffset: endOffset
-        };
-      });
-      var href = window.location.href;
-      var hasPart = chaptersList.map(function (chapter) {
-        var url = new URL(href);
-        url.searchParams.append('vimeo_t', chapter.startOffset);
-        var chapterEnhanced = Object.assign(chapter, {
-          '@type': 'Clip',
-          'url': url.href
-        });
-        return chapterEnhanced;
-      });
-      microdata.hasPart = hasPart;
-    }
-
-    if (scriptElem) {
-      scriptElem.textContent = JSON.stringify([].concat(_toConsumableArray(existingMicrodata), [microdata]));
-    } else {
-      var structuredDataRawText = JSON.stringify([microdata]);
-      var newScriptElem = document.createElement('script');
-      newScriptElem.setAttribute('type', 'application/ld+json');
-      newScriptElem.textContent = structuredDataRawText;
-      document.head.appendChild(newScriptElem);
-    }
-
-    return;
-  }).catch(function (error) {
-    console.error(error.message);
-  });
-}
 
 var arrayIndexOfSupport = typeof Array.prototype.indexOf !== 'undefined';
 var postMessageSupport = typeof window !== 'undefined' && typeof window.postMessage !== 'undefined';
@@ -1256,6 +1161,101 @@ function initializeScreenfull() {
     }
   });
   return screenfull;
+}
+
+/**
+ * Add clip-related markup to page head for Google SEO.
+ *
+ * @param {player} Player An instance of the Player.
+ * @return {void}
+ */
+// TODO: NEED TO DETERMINE WHERE THIS METHOD SHOULD BE DEFINED, IF NOT HERE
+function addClipMarkup(player) {
+  if (!player) {
+    return;
+  } // Any off-site page may have multiple embedded Vimeo videos. We can inject
+  // VideoObject markup for each video. According to the Google SEO team, we
+  // should include 'chapters' data for only one video in the page
+
+
+  var scriptElem = document.querySelector("script[type='application/ld+json']");
+  var existingMicrodataHasChapters;
+  var existingMicrodata = [];
+
+  if (scriptElem) {
+    var temp = JSON.parse(scriptElem.textContent);
+    existingMicrodata = Array.isArray(temp) ? temp.slice() : new Array(temp);
+    existingMicrodataHasChapters = existingMicrodata.some(function (item) {
+      return item.hasOwnProperty('hasPart');
+    });
+  }
+
+  player.getVideoObjectMetadata().then(function (data) {
+    if (!data) {
+      return;
+    } // For key moments rich results, Google requires clips to be at least 30 seconds long
+
+
+    var MIN_DURATION = 30;
+    var defaultThumbnail = 'https://i.vimeocdn.com/portrait/default';
+    var author = data.author,
+        chapters = data.chapters,
+        clipDescription = data.description,
+        clipDurationSec = data.duration,
+        embedUrl = data.embedUrl,
+        thumbsBaseUrl = data.thumbsBaseUrl,
+        name = data.title,
+        uploadDate = data.uploadDate;
+    var duration = "PT".concat(clipDurationSec, "S");
+    var thumbnailUrl = thumbsBaseUrl ? "".concat(thumbsBaseUrl, "_640") : defaultThumbnail;
+    var description = clipDescription.trim().length ? clipDescription : "This is \"".concat(title, "\" by ").concat(author, " on Vimeo, the home for high quality videos and the people who love them.");
+    var microdata = {
+      '@context': 'http://schema.org',
+      '@type': 'VideoObject',
+      name: name,
+      duration: duration,
+      description: description,
+      uploadDate: uploadDate,
+      embedUrl: embedUrl,
+      thumbnailUrl: thumbnailUrl
+    };
+
+    if (chapters.length > 0 && clipDurationSec > MIN_DURATION && !existingMicrodataHasChapters) {
+      var chaptersList = chapters.map(function (chapter, i) {
+        var endOffset = i < chapters.length - 1 ? chapters[i + 1].startTime : clipDurationSec;
+        return {
+          name: chapter.title,
+          startOffset: chapter.startTime,
+          endOffset: endOffset
+        };
+      });
+      var href = window.location.href;
+      var hasPart = chaptersList.map(function (chapter) {
+        var url = new URL(href);
+        url.searchParams.append('vimeo_t', chapter.startOffset);
+        var chapterEnhanced = Object.assign(chapter, {
+          '@type': 'Clip',
+          'url': url.href
+        });
+        return chapterEnhanced;
+      });
+      microdata.hasPart = hasPart;
+    }
+
+    if (scriptElem) {
+      scriptElem.textContent = JSON.stringify([].concat(_toConsumableArray(existingMicrodata), [microdata]));
+    } else {
+      var structuredDataRawText = JSON.stringify([microdata]);
+      var newScriptElem = document.createElement('script');
+      newScriptElem.setAttribute('type', 'application/ld+json');
+      newScriptElem.textContent = structuredDataRawText;
+      document.head.appendChild(newScriptElem);
+    }
+
+    return;
+  }).catch(function (error) {
+    console.error(error.message);
+  });
 }
 
 var playerMap = new WeakMap();
