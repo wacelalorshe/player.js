@@ -23,7 +23,7 @@ export function addClipMarkup(player) {
         existingMicrodataHasChapters = existingMicrodata.some((item) => item.hasOwnProperty('hasPart'));
     }
 
-    player.getVideoObjectMetadata()
+    player.get('videoObjectMetadata')
         .then((data) => {
             if (!data) {
                 return;

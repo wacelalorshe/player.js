@@ -1190,7 +1190,7 @@ function addClipMarkup(player) {
     });
   }
 
-  player.getVideoObjectMetadata().then(function (data) {
+  player.get('videoObjectMetadata').then(function (data) {
     if (!data) {
       return;
     } // For key moments rich results, Google requires clips to be at least 30 seconds long
@@ -2532,24 +2532,6 @@ var Player = /*#__PURE__*/function () {
     key: "getVideoTitle",
     value: function getVideoTitle() {
       return this.get('videoTitle');
-    }
-    /**
-     * A promise to get the video's VideoObject metadata.
-     *
-     * @promise GetVideoObjectmetadataPromise
-     * @fulfill {object} The VideoObject metadata for the video.
-     */
-
-    /**
-     * Get the VideoObject metadata for the video.
-     *
-     * @return {GetVideoObjectmetadataPromise}
-     */
-
-  }, {
-    key: "getVideoObjectMetadata",
-    value: function getVideoObjectMetadata() {
-      return this.get('videoObjectMetadata');
     }
     /**
      * A promise to get the native width of the video.

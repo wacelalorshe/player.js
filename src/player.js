@@ -1125,21 +1125,6 @@ class Player {
     }
 
     /**
-     * A promise to get the video's VideoObject metadata.
-     *
-     * @promise GetVideoObjectmetadataPromise
-     * @fulfill {object} The VideoObject metadata for the video.
-     */
-    /**
-     * Get the VideoObject metadata for the video.
-     *
-     * @return {GetVideoObjectmetadataPromise}
-     */
-    getVideoObjectMetadata() {
-        return this.get('videoObjectMetadata');
-    }
-
-    /**
      * A promise to get the native width of the video.
      *
      * @promise GetVideoWidthPromise
