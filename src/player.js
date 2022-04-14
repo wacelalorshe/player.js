@@ -8,7 +8,7 @@ import { getMethodName, isDomElement, isVimeoUrl, getVimeoUrl, isNode } from './
 import { getOEmbedParameters, getOEmbedData, createEmbed, initializeEmbeds, resizeEmbeds } from './lib/embed';
 import { parseMessageData, postMessage, processData } from './lib/postmessage';
 import { initializeScreenfull } from './lib/screenfull.js';
-import { addClipMarkup } from './lib/addClipMarkup';
+import { addVideoObjectMarkup } from './lib/addVideoObjectMarkup';
 
 const playerMap = new WeakMap();
 const readyMap = new WeakMap();
@@ -148,10 +148,8 @@ class Player {
             screenfull.on('fullscreenchange', this.fullscreenchangeHandler);
         }
 
-        // TODO: NEED TO DETERMINE
-        // 1  IF addClipMarkup CAN BE CALLED FROM HERE AND
-        // 2  WHETHER WE SHOULD ONLY CALL addClipMarkup CONDITIONALLY
-        addClipMarkup(this);
+        // Add video-specific markup for Google SEO
+        addVideoObjectMarkup(this);
 
         return this;
     }

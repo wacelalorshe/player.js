@@ -27,39 +27,6 @@
     return Constructor;
   }
 
-  function _toConsumableArray(arr) {
-    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
-  }
-
-  function _arrayWithoutHoles(arr) {
-    if (Array.isArray(arr)) return _arrayLikeToArray(arr);
-  }
-
-  function _iterableToArray(iter) {
-    if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
-  }
-
-  function _unsupportedIterableToArray(o, minLen) {
-    if (!o) return;
-    if (typeof o === "string") return _arrayLikeToArray(o, minLen);
-    var n = Object.prototype.toString.call(o).slice(8, -1);
-    if (n === "Object" && o.constructor) n = o.constructor.name;
-    if (n === "Map" || n === "Set") return Array.from(o);
-    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
-  }
-
-  function _arrayLikeToArray(arr, len) {
-    if (len == null || len > arr.length) len = arr.length;
-
-    for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
-
-    return arr2;
-  }
-
-  function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-
   /**
    * @module lib/functions
    */
@@ -1170,51 +1137,51 @@
   }
 
   /**
-   * Add clip-related markup to page head for Google SEO.
+   * Add video-related markup to page head for Google SEO.
    *
    * @param {player} Player An instance of the Player.
    * @return {void}
    */
-  // TODO: NEED TO DETERMINE WHERE THIS METHOD SHOULD BE DEFINED, IF NOT HERE
-  function addClipMarkup(player) {
+  function addVideoObjectMarkup(player) {
     if (!player) {
       return;
-    } // Any off-site page may have multiple embedded Vimeo videos. We can inject
-    // VideoObject markup for each video. According to the Google SEO team, we
-    // should include 'chapters' data for only one video in the page
-
-
-    var scriptElem = document.querySelector("script[type='application/ld+json']");
-    var existingMicrodataHasChapters;
-    var existingMicrodata = [];
-
-    if (scriptElem) {
-      var temp = JSON.parse(scriptElem.textContent);
-      existingMicrodata = Array.isArray(temp) ? temp.slice() : new Array(temp);
-      existingMicrodataHasChapters = existingMicrodata.some(function (item) {
-        return item.hasOwnProperty('hasPart');
-      });
     }
 
     player.get('videoObjectMetadata').then(function (data) {
       if (!data) {
         return;
-      } // For key moments rich results, Google requires clips to be at least 30 seconds long
+      } // Any off-site page may have multiple embedded Vimeo videos. We can inject
+      // VideoObject markup for each video. According to the Google SEO team, we
+      // should include key moments (chapters) data for only one video in the page
+
+
+      var scriptElem = document.querySelector("script[type='application/ld+json']");
+      var existingMicrodataHasChapters;
+      var existingMicrodata = [];
+
+      if (scriptElem) {
+        try {
+          var _data = JSON.parse(scriptElem.textContent);
+
+          existingMicrodata = Array.isArray(_data) ? _data.slice() : new Array(_data);
+          existingMicrodataHasChapters = existingMicrodata.some(function (item) {
+            return item.hasOwnProperty('hasPart');
+          });
+        } catch (error) {
+          console.warn(error);
+        }
+      } // For key moments rich results, Google requires videos to be at least 30 seconds long
 
 
       var MIN_DURATION = 30;
-      var defaultThumbnail = 'https://i.vimeocdn.com/portrait/default';
-      var author = data.author,
-          chapters = data.chapters,
-          clipDescription = data.description,
-          clipDurationSec = data.duration,
+      var chapters = data.chapters,
+          description = data.description,
+          videoDurationSec = data.duration,
           embedUrl = data.embedUrl,
-          thumbsBaseUrl = data.thumbsBaseUrl,
+          thumbnailUrl = data.thumbnailUrl,
           name = data.title,
           uploadDate = data.uploadDate;
-      var duration = "PT".concat(clipDurationSec, "S");
-      var thumbnailUrl = thumbsBaseUrl ? "".concat(thumbsBaseUrl, "_640") : defaultThumbnail;
-      var description = clipDescription.trim().length ? clipDescription : "This is \"".concat(title, "\" by ").concat(author, " on Vimeo, the home for high quality videos and the people who love them.");
+      var duration = "PT".concat(videoDurationSec, "S");
       var microdata = {
         '@context': 'http://schema.org',
         '@type': 'VideoObject',
@@ -1226,9 +1193,9 @@
         thumbnailUrl: thumbnailUrl
       };
 
-      if (chapters.length > 0 && clipDurationSec > MIN_DURATION && !existingMicrodataHasChapters) {
+      if (chapters.length > 0 && videoDurationSec > MIN_DURATION && !existingMicrodataHasChapters) {
         var chaptersList = chapters.map(function (chapter, i) {
-          var endOffset = i < chapters.length - 1 ? chapters[i + 1].startTime : clipDurationSec;
+          var endOffset = i < chapters.length - 1 ? chapters[i + 1].startTime : videoDurationSec;
           return {
             name: chapter.title,
             startOffset: chapter.startTime,
@@ -1249,7 +1216,7 @@
       }
 
       if (scriptElem) {
-        scriptElem.textContent = JSON.stringify([].concat(_toConsumableArray(existingMicrodata), [microdata]));
+        scriptElem.textContent = JSON.stringify(existingMicrodata.concat(microdata));
       } else {
         var structuredDataRawText = JSON.stringify([microdata]);
         var newScriptElem = document.createElement('script');
@@ -1259,9 +1226,7 @@
       }
 
       return;
-    }).catch(function (error) {
-      console.error(error.message);
-    });
+    }).catch(function () {});
   }
 
   var playerMap = new WeakMap();
@@ -1404,12 +1369,10 @@
         };
 
         screenfull.on('fullscreenchange', this.fullscreenchangeHandler);
-      } // TODO: NEED TO DETERMINE
-      // 1  IF addClipMarkup CAN BE CALLED FROM HERE AND
-      // 2  WHETHER WE SHOULD ONLY CALL addClipMarkup CONDITIONALLY
+      } // Add video-specific markup for Google SEO
 
 
-      addClipMarkup(this);
+      addVideoObjectMarkup(this);
       return this;
     }
     /**

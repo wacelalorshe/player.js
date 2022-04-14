@@ -1,26 +1,12 @@
 /**
- * Add clip-related markup to page head for Google SEO.
+ * Add video-related markup to page head for Google SEO.
  *
  * @param {player} Player An instance of the Player.
  * @return {void}
  */
-// TODO: NEED TO DETERMINE WHERE THIS METHOD SHOULD BE DEFINED, IF NOT HERE
-export function addClipMarkup(player) {
+export function addVideoObjectMarkup(player) {
     if (!player) {
         return;
-    }
-
-    // Any off-site page may have multiple embedded Vimeo videos. We can inject
-    // VideoObject markup for each video. According to the Google SEO team, we
-    // should include 'chapters' data for only one video in the page
-    const scriptElem = document.querySelector("script[type='application/ld+json']");
-    let existingMicrodataHasChapters;
-    let existingMicrodata = [];
-
-    if (scriptElem) {
-        const temp = JSON.parse(scriptElem.textContent);
-        existingMicrodata = Array.isArray(temp) ? temp.slice() : new Array(temp);
-        existingMicrodataHasChapters = existingMicrodata.some((item) => item.hasOwnProperty('hasPart'));
     }
 
     player.get('videoObjectMetadata')
@@ -29,22 +15,36 @@ export function addClipMarkup(player) {
                 return;
             }
 
-            // For key moments rich results, Google requires clips to be at least 30 seconds long
+            // Any off-site page may have multiple embedded Vimeo videos. We can inject
+            // VideoObject markup for each video. According to the Google SEO team, we
+            // should include key moments (chapters) data for only one video in the page
+            const scriptElem = document.querySelector("script[type='application/ld+json']");
+            let existingMicrodataHasChapters;
+            let existingMicrodata = [];
+
+            if (scriptElem) {
+                try {
+                    const data = JSON.parse(scriptElem.textContent);
+                    existingMicrodata = Array.isArray(data) ? data.slice() : new Array(data);
+                    existingMicrodataHasChapters = existingMicrodata.some((item) => item.hasOwnProperty('hasPart'));
+                }
+                catch (error) {
+                    console.warn(error);
+                }
+            }
+
+            // For key moments rich results, Google requires videos to be at least 30 seconds long
             const MIN_DURATION = 30;
-            const defaultThumbnail = 'https://i.vimeocdn.com/portrait/default';
             const {
-                author,
                 chapters,
-                description: clipDescription,
-                duration: clipDurationSec,
+                description,
+                duration: videoDurationSec,
                 embedUrl,
-                thumbsBaseUrl,
+                thumbnailUrl,
                 title: name,
                 uploadDate
             } = data;
-            const duration = `PT${clipDurationSec}S`;
-            const thumbnailUrl = thumbsBaseUrl ? `${thumbsBaseUrl}_640` : defaultThumbnail;
-            const description = (clipDescription.trim().length) ? clipDescription : `This is "${title}" by ${author} on Vimeo, the home for high quality videos and the people who love them.`;
+            const duration = `PT${videoDurationSec}S`;
             const microdata = {
                 '@context': 'http://schema.org',
                 '@type': 'VideoObject',
@@ -56,9 +56,9 @@ export function addClipMarkup(player) {
                 thumbnailUrl
             };
 
-            if (chapters.length > 0 && clipDurationSec > MIN_DURATION && !existingMicrodataHasChapters) {
+            if (chapters.length > 0 && videoDurationSec > MIN_DURATION && !existingMicrodataHasChapters) {
                 const chaptersList = chapters.map((chapter, i) => {
-                    const endOffset = i < chapters.length - 1 ? chapters[i + 1].startTime : clipDurationSec;
+                    const endOffset = i < chapters.length - 1 ? chapters[i + 1].startTime : videoDurationSec;
                     return {
                         name: chapter.title,
                         startOffset: chapter.startTime,
@@ -82,7 +82,7 @@ export function addClipMarkup(player) {
             }
 
             if (scriptElem) {
-                scriptElem.textContent = JSON.stringify([...existingMicrodata, microdata]);
+                scriptElem.textContent = JSON.stringify(existingMicrodata.concat(microdata));
             }
             else {
                 const structuredDataRawText = JSON.stringify([microdata]);
@@ -94,7 +94,5 @@ export function addClipMarkup(player) {
 
             return;
         })
-        .catch((error) => {
-            console.error(error.message);
-        });
+        .catch(() => {});
 }
