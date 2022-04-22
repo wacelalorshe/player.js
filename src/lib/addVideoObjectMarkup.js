@@ -1,7 +1,79 @@
 /**
- * Add video-related markup to page head for Google SEO.
+ * Append special 'vimeo_t' time param to a URL
  *
- * @param {player} Player An instance of the Player.
+ * @param {number} time Start time of video chapter
+ * @return {string}
+ */
+function appendTimeQuery(time) {
+    const { href, search, hash } = window.location;
+    let newHref = '';
+    const timeParam = `vimeo_t=${time}`;
+
+    if (search.length) {
+        const qs = `${search}&${timeParam}`;
+        newHref = href.replace(search, qs);
+    }
+    else {
+        newHref = hash.length ? href.replace(hash, `?${timeParam}${hash}`) : `${href}?${timeParam}${hash}`;
+    }
+
+    return newHref;
+}
+
+/**
+ * Generate VideoObject schema markup for this video
+ *
+ * @param {object} data Object with video metadata
+ * @return {array}
+ */
+function generateMicrodata(data) {
+    const {
+        description,
+        duration,
+        embedUrl,
+        thumbnailUrl,
+        title,
+        uploadDate
+    } = data;
+
+    const microdata = {
+        '@context': 'http://schema.org',
+        '@type': 'VideoObject',
+        'name': title,
+        'duration': `PT${duration}S`,
+        description,
+        uploadDate,
+        embedUrl,
+        thumbnailUrl
+    };
+
+    return microdata;
+}
+
+/**
+ * Map a list of video chapters to valid 'hasPart' schema
+ *
+ * @param {array} chapters An array of chapter data objects
+ * @return {array}
+ */
+function processChapters(chapters) {
+    const hasPart = chapters.map((chapter) => {
+        const url = appendTimeQuery(chapter.startOffset);
+        const chapterEnhanced = Object.assign(chapter, {
+            '@type': 'Clip',
+            'url': url
+        });
+
+        return chapterEnhanced;
+    });
+
+    return hasPart;
+}
+
+/**
+ * Add VideoObject schema markup to page head for Google SEO.
+ *
+ * @param {Player} player An instance of the Player.
  * @return {void}
  */
 export function addVideoObjectMarkup(player) {
@@ -15,7 +87,9 @@ export function addVideoObjectMarkup(player) {
                 return;
             }
 
-            // Any off-site page may have multiple embedded Vimeo videos. We can inject
+            const { chapters } = data;
+
+            // An off-site page may have multiple embedded Vimeo videos. We can inject
             // VideoObject markup for each video. According to the Google SEO team, we
             // should include key moments (chapters) data for only one video in the page
             const scriptElem = document.querySelector("script[type='application/ld+json']");
@@ -24,8 +98,8 @@ export function addVideoObjectMarkup(player) {
 
             if (scriptElem) {
                 try {
-                    const data = JSON.parse(scriptElem.textContent);
-                    existingMicrodata = Array.isArray(data) ? data.slice() : new Array(data);
+                    const scriptContents = JSON.parse(scriptElem.textContent);
+                    existingMicrodata = Array.isArray(scriptContents) ? scriptContents.slice() : new Array(scriptContents);
                     existingMicrodataHasChapters = existingMicrodata.some((item) => item.hasOwnProperty('hasPart'));
                 }
                 catch (error) {
@@ -33,52 +107,9 @@ export function addVideoObjectMarkup(player) {
                 }
             }
 
-            // For key moments rich results, Google requires videos to be at least 30 seconds long
-            const MIN_DURATION = 30;
-            const {
-                chapters,
-                description,
-                duration: videoDurationSec,
-                embedUrl,
-                thumbnailUrl,
-                title: name,
-                uploadDate
-            } = data;
-            const duration = `PT${videoDurationSec}S`;
-            const microdata = {
-                '@context': 'http://schema.org',
-                '@type': 'VideoObject',
-                name,
-                duration,
-                description,
-                uploadDate,
-                embedUrl,
-                thumbnailUrl
-            };
-
-            if (chapters.length > 0 && videoDurationSec > MIN_DURATION && !existingMicrodataHasChapters) {
-                const chaptersList = chapters.map((chapter, i) => {
-                    const endOffset = i < chapters.length - 1 ? chapters[i + 1].startTime : videoDurationSec;
-                    return {
-                        name: chapter.title,
-                        startOffset: chapter.startTime,
-                        endOffset
-                    };
-                });
-
-                const { href } = window.location;
-                const hasPart = chaptersList.map((chapter) => {
-                    const url = new URL(href);
-                    url.searchParams.append('vimeo_t', chapter.startOffset);
-                    const chapterEnhanced = Object.assign(chapter, {
-                        '@type': 'Clip',
-                        'url': url.href
-                    });
-
-                    return chapterEnhanced;
-                });
-
-                microdata.hasPart = hasPart;
+            const microdata = generateMicrodata(data);
+            if (chapters.length > 0 && !existingMicrodataHasChapters) {
+                microdata.hasPart = processChapters(chapters);
             }
 
             if (scriptElem) {

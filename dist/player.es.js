@@ -1131,11 +1131,82 @@ function initializeScreenfull() {
 }
 
 /**
- * Add video-related markup to page head for Google SEO.
+ * Append special 'vimeo_t' time param to a URL
  *
- * @param {player} Player An instance of the Player.
+ * @param {number} time Start time of video chapter
+ * @return {string}
+ */
+function appendTimeQuery(time) {
+  var _window$location = window.location,
+      href = _window$location.href,
+      search = _window$location.search,
+      hash = _window$location.hash;
+  var newHref = '';
+  var timeParam = "vimeo_t=".concat(time);
+
+  if (search.length) {
+    var qs = "".concat(search, "&").concat(timeParam);
+    newHref = href.replace(search, qs);
+  } else {
+    newHref = hash.length ? href.replace(hash, "?".concat(timeParam).concat(hash)) : "".concat(href, "?").concat(timeParam).concat(hash);
+  }
+
+  return newHref;
+}
+/**
+ * Generate VideoObject schema markup for this video
+ *
+ * @param {object} data Object with video metadata
+ * @return {array}
+ */
+
+
+function generateMicrodata(data) {
+  var description = data.description,
+      duration = data.duration,
+      embedUrl = data.embedUrl,
+      thumbnailUrl = data.thumbnailUrl,
+      title = data.title,
+      uploadDate = data.uploadDate;
+  var microdata = {
+    '@context': 'http://schema.org',
+    '@type': 'VideoObject',
+    'name': title,
+    'duration': "PT".concat(duration, "S"),
+    description: description,
+    uploadDate: uploadDate,
+    embedUrl: embedUrl,
+    thumbnailUrl: thumbnailUrl
+  };
+  return microdata;
+}
+/**
+ * Map a list of video chapters to valid 'hasPart' schema
+ *
+ * @param {array} chapters An array of chapter data objects
+ * @return {array}
+ */
+
+
+function processChapters(chapters) {
+  var hasPart = chapters.map(function (chapter) {
+    var url = appendTimeQuery(chapter.startOffset);
+    var chapterEnhanced = Object.assign(chapter, {
+      '@type': 'Clip',
+      'url': url
+    });
+    return chapterEnhanced;
+  });
+  return hasPart;
+}
+/**
+ * Add VideoObject schema markup to page head for Google SEO.
+ *
+ * @param {Player} player An instance of the Player.
  * @return {void}
  */
+
+
 function addVideoObjectMarkup(player) {
   if (!player) {
     return;
@@ -1144,10 +1215,11 @@ function addVideoObjectMarkup(player) {
   player.get('videoObjectMetadata').then(function (data) {
     if (!data) {
       return;
-    } // Any off-site page may have multiple embedded Vimeo videos. We can inject
+    }
+
+    var chapters = data.chapters; // An off-site page may have multiple embedded Vimeo videos. We can inject
     // VideoObject markup for each video. According to the Google SEO team, we
     // should include key moments (chapters) data for only one video in the page
-
 
     var scriptElem = document.querySelector("script[type='application/ld+json']");
     var existingMicrodataHasChapters;
@@ -1155,58 +1227,20 @@ function addVideoObjectMarkup(player) {
 
     if (scriptElem) {
       try {
-        var _data = JSON.parse(scriptElem.textContent);
-
-        existingMicrodata = Array.isArray(_data) ? _data.slice() : new Array(_data);
+        var scriptContents = JSON.parse(scriptElem.textContent);
+        existingMicrodata = Array.isArray(scriptContents) ? scriptContents.slice() : new Array(scriptContents);
         existingMicrodataHasChapters = existingMicrodata.some(function (item) {
           return item.hasOwnProperty('hasPart');
         });
       } catch (error) {
         console.warn(error);
       }
-    } // For key moments rich results, Google requires videos to be at least 30 seconds long
+    }
 
+    var microdata = generateMicrodata(data);
 
-    var MIN_DURATION = 30;
-    var chapters = data.chapters,
-        description = data.description,
-        videoDurationSec = data.duration,
-        embedUrl = data.embedUrl,
-        thumbnailUrl = data.thumbnailUrl,
-        name = data.title,
-        uploadDate = data.uploadDate;
-    var duration = "PT".concat(videoDurationSec, "S");
-    var microdata = {
-      '@context': 'http://schema.org',
-      '@type': 'VideoObject',
-      name: name,
-      duration: duration,
-      description: description,
-      uploadDate: uploadDate,
-      embedUrl: embedUrl,
-      thumbnailUrl: thumbnailUrl
-    };
-
-    if (chapters.length > 0 && videoDurationSec > MIN_DURATION && !existingMicrodataHasChapters) {
-      var chaptersList = chapters.map(function (chapter, i) {
-        var endOffset = i < chapters.length - 1 ? chapters[i + 1].startTime : videoDurationSec;
-        return {
-          name: chapter.title,
-          startOffset: chapter.startTime,
-          endOffset: endOffset
-        };
-      });
-      var href = window.location.href;
-      var hasPart = chaptersList.map(function (chapter) {
-        var url = new URL(href);
-        url.searchParams.append('vimeo_t', chapter.startOffset);
-        var chapterEnhanced = Object.assign(chapter, {
-          '@type': 'Clip',
-          'url': url.href
-        });
-        return chapterEnhanced;
-      });
-      microdata.hasPart = hasPart;
+    if (chapters.length > 0 && !existingMicrodataHasChapters) {
+      microdata.hasPart = processChapters(chapters);
     }
 
     if (scriptElem) {
