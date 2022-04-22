@@ -61,13 +61,44 @@ function processChapters(chapters) {
         const url = appendTimeQuery(chapter.startOffset);
         const chapterEnhanced = Object.assign(chapter, {
             '@type': 'Clip',
-            'url': url
+            url
         });
 
         return chapterEnhanced;
     });
 
     return hasPart;
+}
+
+/**
+ * Check page for existing VideoObject schema that includes
+ * chapters
+ *
+ * @return {boolean}
+ */
+function checkExistingChaptersMicrodata() {
+    const ldJsonScriptElems = document.querySelectorAll("script[type='application/ld+json']");
+
+    if (ldJsonScriptElems.length) {
+        for (let i = 0; i < ldJsonScriptElems.length; i++) {
+            try {
+                const scriptContents = JSON.parse(ldJsonScriptElems[i].textContent);
+                if (Array.isArray(scriptContents)) {
+                    if (scriptContents.some((item) => item.hasOwnProperty('hasPart'))) {
+                        return true;
+                    }
+                }
+                else if (scriptContents.hasOwnProperty('hasPart')) {
+                    return true;
+                }
+            }
+            catch (error) {
+                console.warn(error);
+            }
+        }
+    }
+
+    return false;
 }
 
 /**
@@ -88,42 +119,24 @@ export function addVideoObjectMarkup(player) {
             }
 
             const { chapters } = data;
-
-            // An off-site page may have multiple embedded Vimeo videos. We can inject
-            // VideoObject markup for each video. According to the Google SEO team, we
-            // should include key moments (chapters) data for only one video in the page
-            const scriptElem = document.querySelector("script[type='application/ld+json']");
-            let existingMicrodataHasChapters;
-            let existingMicrodata = [];
-
-            if (scriptElem) {
-                try {
-                    const scriptContents = JSON.parse(scriptElem.textContent);
-                    existingMicrodata = Array.isArray(scriptContents) ? scriptContents.slice() : new Array(scriptContents);
-                    existingMicrodataHasChapters = existingMicrodata.some((item) => item.hasOwnProperty('hasPart'));
-                }
-                catch (error) {
-                    console.warn(error);
-                }
-            }
-
             const microdata = generateMicrodata(data);
-            if (chapters.length > 0 && !existingMicrodataHasChapters) {
+
+            // A page may contain multiple embedded Vimeo videos. VideoObject
+            // SEO markup can be injected into the page for each video. But for
+            // video chapters to display as rich search results in Google, we
+            // should only inject chapters data for one of the videos.
+            const noChaptersInExistingPageMetadata = !checkExistingChaptersMicrodata();
+            if (chapters.length && noChaptersInExistingPageMetadata) {
                 microdata.hasPart = processChapters(chapters);
             }
 
-            if (scriptElem) {
-                scriptElem.textContent = JSON.stringify(existingMicrodata.concat(microdata));
-            }
-            else {
-                const structuredDataRawText = JSON.stringify([microdata]);
-                const newScriptElem = document.createElement('script');
-                newScriptElem.setAttribute('type', 'application/ld+json');
-                newScriptElem.textContent = structuredDataRawText;
-                document.head.appendChild(newScriptElem);
-            }
+            const structuredDataRawText = JSON.stringify([microdata]);
+            const scriptElem = document.createElement('script');
+            scriptElem.setAttribute('type', 'application/ld+json');
+            scriptElem.textContent = structuredDataRawText;
+            document.head.appendChild(scriptElem);
 
             return;
         })
-        .catch(() => {});
+        .catch(() => { });
 }

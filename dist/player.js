@@ -1199,11 +1199,44 @@
       var url = appendTimeQuery(chapter.startOffset);
       var chapterEnhanced = Object.assign(chapter, {
         '@type': 'Clip',
-        'url': url
+        url: url
       });
       return chapterEnhanced;
     });
     return hasPart;
+  }
+  /**
+   * Check page for existing VideoObject schema that includes
+   * chapters
+   *
+   * @return {boolean}
+   */
+
+
+  function checkExistingChaptersMicrodata() {
+    var ldJsonScriptElems = document.querySelectorAll("script[type='application/ld+json']");
+
+    if (ldJsonScriptElems.length) {
+      for (var i = 0; i < ldJsonScriptElems.length; i++) {
+        try {
+          var scriptContents = JSON.parse(ldJsonScriptElems[i].textContent);
+
+          if (Array.isArray(scriptContents)) {
+            if (scriptContents.some(function (item) {
+              return item.hasOwnProperty('hasPart');
+            })) {
+              return true;
+            }
+          } else if (scriptContents.hasOwnProperty('hasPart')) {
+            return true;
+          }
+        } catch (error) {
+          console.warn(error);
+        }
+      }
+    }
+
+    return false;
   }
   /**
    * Add VideoObject schema markup to page head for Google SEO.
@@ -1223,42 +1256,23 @@
         return;
       }
 
-      var chapters = data.chapters; // An off-site page may have multiple embedded Vimeo videos. We can inject
-      // VideoObject markup for each video. According to the Google SEO team, we
-      // should include key moments (chapters) data for only one video in the page
+      var chapters = data.chapters;
+      var microdata = generateMicrodata(data); // A page may contain multiple embedded Vimeo videos. VideoObject
+      // SEO markup can be injected into the page for each video. But for
+      // video chapters to display as rich search results in Google, we
+      // should only inject chapters data for one of the videos.
 
-      var scriptElem = document.querySelector("script[type='application/ld+json']");
-      var existingMicrodataHasChapters;
-      var existingMicrodata = [];
+      var noChaptersInExistingPageMetadata = !checkExistingChaptersMicrodata();
 
-      if (scriptElem) {
-        try {
-          var scriptContents = JSON.parse(scriptElem.textContent);
-          existingMicrodata = Array.isArray(scriptContents) ? scriptContents.slice() : new Array(scriptContents);
-          existingMicrodataHasChapters = existingMicrodata.some(function (item) {
-            return item.hasOwnProperty('hasPart');
-          });
-        } catch (error) {
-          console.warn(error);
-        }
-      }
-
-      var microdata = generateMicrodata(data);
-
-      if (chapters.length > 0 && !existingMicrodataHasChapters) {
+      if (chapters.length && noChaptersInExistingPageMetadata) {
         microdata.hasPart = processChapters(chapters);
       }
 
-      if (scriptElem) {
-        scriptElem.textContent = JSON.stringify(existingMicrodata.concat(microdata));
-      } else {
-        var structuredDataRawText = JSON.stringify([microdata]);
-        var newScriptElem = document.createElement('script');
-        newScriptElem.setAttribute('type', 'application/ld+json');
-        newScriptElem.textContent = structuredDataRawText;
-        document.head.appendChild(newScriptElem);
-      }
-
+      var structuredDataRawText = JSON.stringify([microdata]);
+      var scriptElem = document.createElement('script');
+      scriptElem.setAttribute('type', 'application/ld+json');
+      scriptElem.textContent = structuredDataRawText;
+      document.head.appendChild(scriptElem);
       return;
     }).catch(function () {});
   }
