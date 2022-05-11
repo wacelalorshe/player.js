@@ -133,9 +133,9 @@
   }
 
   /*!
-   * weakmap-polyfill v2.0.1 - ECMAScript6 WeakMap polyfill
+   * weakmap-polyfill v2.0.4 - ECMAScript6 WeakMap polyfill
    * https://github.com/polygonplanet/weakmap-polyfill
-   * Copyright (c) 2015-2020 Polygon Planet <polygon.planet.aqua@gmail.com>
+   * Copyright (c) 2015-2021 polygonplanet <polygon.planet.aqua@gmail.com>
    * @license MIT
    */
   (function (self) {
@@ -146,8 +146,17 @@
 
     var hasOwnProperty = Object.prototype.hasOwnProperty;
 
+    var hasDefine = Object.defineProperty && function () {
+      try {
+        // Avoid IE8's broken Object.defineProperty
+        return Object.defineProperty({}, 'x', {
+          value: 1
+        }).x === 1;
+      } catch (e) {}
+    }();
+
     var defineProperty = function (object, name, value) {
-      if (Object.defineProperty) {
+      if (hasDefine) {
         Object.defineProperty(object, name, {
           configurable: true,
           writable: true,
@@ -262,7 +271,7 @@
     function isObject(x) {
       return Object(x) === x;
     }
-  })(typeof self !== 'undefined' ? self : typeof window !== 'undefined' ? window : typeof commonjsGlobal !== 'undefined' ? commonjsGlobal : commonjsGlobal);
+  })(typeof globalThis !== 'undefined' ? globalThis : typeof self !== 'undefined' ? self : typeof window !== 'undefined' ? window : typeof commonjsGlobal !== 'undefined' ? commonjsGlobal : commonjsGlobal);
 
   var npo_src = createCommonjsModule(function (module) {
   /*! Native Promise Only
@@ -273,7 +282,7 @@
     // special form of UMD for polyfilling across evironments
     context[name] = context[name] || definition();
 
-    if (module.exports) {
+    if ( module.exports) {
       module.exports = context[name];
     }
   })("Promise", typeof commonjsGlobal != "undefined" ? commonjsGlobal : commonjsGlobal, function DEF() {
@@ -1267,8 +1276,10 @@
         };
 
         screenfull.on('fullscreenchange', this.fullscreenchangeHandler);
-      }
+      } // Add video-specific markup for Google SEO
 
+
+      this.callMethod('addVideoObjectMetadata', window.location.href);
       return this;
     }
     /**

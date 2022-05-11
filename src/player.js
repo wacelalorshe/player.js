@@ -147,6 +147,9 @@ class Player {
             screenfull.on('fullscreenchange', this.fullscreenchangeHandler);
         }
 
+        // Add video-specific markup for Google SEO
+        this.callMethod('addVideoObjectMetadata', window.location.href);
+
         return this;
     }
 
