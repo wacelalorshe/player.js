@@ -147,8 +147,8 @@ class Player {
             screenfull.on('fullscreenchange', this.fullscreenchangeHandler);
         }
 
-        // Add video-specific markup for Google SEO
-        this.callMethod('addVideoObjectMetadata', window.location.href);
+        // Add chapters to existing VideoObject metadata for Google SEO
+        this.callMethod('addHasPartMetadata', window.location.href);
 
         return this;
     }

@@ -1270,10 +1270,10 @@ var Player = /*#__PURE__*/function () {
       };
 
       screenfull.on('fullscreenchange', this.fullscreenchangeHandler);
-    } // Add video-specific markup for Google SEO
+    } // Add chapters to existing VideoObject metadata for Google SEO
 
 
-    this.callMethod('addVideoObjectMetadata', window.location.href);
+    this.callMethod('addHasPartMetadata', window.location.href);
     return this;
   }
   /**
