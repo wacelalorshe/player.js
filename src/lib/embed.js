@@ -2,7 +2,8 @@
  * @module lib/embed
  */
 
-import { isVimeoUrl, getVimeoUrl } from './functions';
+import Player from '../player';
+import { isVimeoUrl, isVimeoEmbed, getVimeoUrl } from './functions';
 import { parseMessageData } from './postmessage';
 
 const oEmbedParameters = [
@@ -221,17 +222,12 @@ export function resizeEmbeds(parent = document) {
  * @param {HTMLElement} [parent=document] The parent element.
  * @return {void}
  */
- export function initAppendSeoMarkup(parent = document) {
+export function initAppendSeoMarkup(parent = document) {
     //  Prevent execution if users include the player.js script multiple times.
     if (window.VimeoSeoTimestamps_) {
         return;
     }
     window.VimeoSeoTimestamps_ = true;
-
-    const isVimeoEmbed = (url) => {
-        const expr = /^https:\/\/player\.vimeo\.com\/video\/\d{1,9}\?h=([a-z0-9]{10,})/;
-        return expr.test(url);
-    }    
 
     const onMessage = (event) => {
         const data = parseMessageData(event.data);
@@ -253,7 +249,7 @@ export function resizeEmbeds(parent = document) {
 
             // Initiate appendSeoMarkup if iframe is a Vimeo embed
             if (isVimeoEmbed(iframe.src)) {
-                const player = new Vimeo.Player(iframe);
+                const player = new Player(iframe);
                 player.callMethod('appendSeoMarkup', window.location.href);
             }
         }

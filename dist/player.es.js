@@ -81,6 +81,17 @@ function isVimeoUrl(url) {
   return /^(https?:)?\/\/((player|www)\.)?vimeo\.com(?=$|\/)/.test(url);
 }
 /**
+ * Check to see if the URL is for a Vimeo embed.
+ *
+ * @param {string} url The url string.
+ * @return {boolean}
+ */
+
+function isVimeoEmbed(url) {
+  var expr = /^https:\/\/player\.vimeo\.com\/video\/\d+\?h=([a-z0-9]+)/;
+  return expr.test(url);
+}
+/**
  * Get the Vimeo URL from an element.
  * The element must have either a data-vimeo-id or data-vimeo-url attribute.
  *
@@ -1032,11 +1043,6 @@ function initAppendSeoMarkup() {
 
   window.VimeoSeoTimestamps_ = true;
 
-  var isVimeoEmbed = function isVimeoEmbed(url) {
-    var expr = /^https:\/\/player\.vimeo\.com\/video\/\d{1,9}\?h=([a-z0-9]{10,})/;
-    return expr.test(url);
-  };
-
   var onMessage = function onMessage(event) {
     var data = parseMessageData(event.data);
 
@@ -1059,7 +1065,7 @@ function initAppendSeoMarkup() {
 
 
       if (isVimeoEmbed(iframe.src)) {
-        var player = new Vimeo.Player(iframe);
+        var player = new Player(iframe);
         player.callMethod('appendSeoMarkup', window.location.href);
       }
     }

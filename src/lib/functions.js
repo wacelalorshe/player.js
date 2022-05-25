@@ -62,6 +62,17 @@ export function isVimeoUrl(url) {
 }
 
 /**
+ * Check to see if the URL is for a Vimeo embed.
+ *
+ * @param {string} url The url string.
+ * @return {boolean}
+ */
+export function isVimeoEmbed(url) {
+    const expr = /^https:\/\/player\.vimeo\.com\/video\/\d+\?h=([a-z0-9]+)/;
+    return expr.test(url);
+}
+
+/**
  * Get the Vimeo URL from an element.
  * The element must have either a data-vimeo-id or data-vimeo-url attribute.
  *
