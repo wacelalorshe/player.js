@@ -229,7 +229,7 @@ export function resizeEmbeds(parent = document) {
     window.VimeoSeoTimestamps_ = true;
 
     const isVimeoEmbed = (url) => {
-        const expr = /^https:\/\/player\.vimeo\.com\/video\/\d{9}\?h=/;
+        const expr = /^https:\/\/player\.vimeo\.com\/video\/\d{1,9}\?h=([a-z0-9]{10,})/;
         return expr.test(url);
     }    
 

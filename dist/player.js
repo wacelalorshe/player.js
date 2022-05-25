@@ -1039,7 +1039,7 @@
     window.VimeoSeoTimestamps_ = true;
 
     var isVimeoEmbed = function isVimeoEmbed(url) {
-      var expr = /^https:\/\/player\.vimeo\.com\/video\/\d{9}\?h=/;
+      var expr = /^https:\/\/player\.vimeo\.com\/video\/\d{1,9}\?h=([a-z0-9]{10,})/;
       return expr.test(url);
     };
 
