@@ -3,6 +3,7 @@
  */
 
 import { isVimeoUrl, getVimeoUrl } from './functions';
+import { parseMessageData } from './postmessage';
 
 const oEmbedParameters = [
     'autopause',
@@ -208,6 +209,53 @@ export function resizeEmbeds(parent = document) {
             space.style.paddingBottom = `${event.data.data[0].bottom}px`;
 
             break;
+        }
+    };
+
+    window.addEventListener('message', onMessage);
+}
+
+/**
+ * Add chapters to existing metadata for Google SEO
+ *
+ * @param {HTMLElement} [parent=document] The parent element.
+ * @return {void}
+ */
+ export function initAppendSeoMarkup(parent = document) {
+    //  Prevent execution if users include the player.js script multiple times.
+    if (window.VimeoSeoTimestamps_) {
+        return;
+    }
+    window.VimeoSeoTimestamps_ = true;
+
+    const isVimeoEmbed = (url) => {
+        const expr = /^https:\/\/player\.vimeo\.com\/video\/\d{9}\?h=/;
+        return expr.test(url);
+    }    
+
+    const onMessage = (event) => {
+        const data = parseMessageData(event.data);
+
+        if (!data || data.event !== 'ready') {
+            return;
+        }
+
+        if (!isVimeoUrl(event.origin)) {
+            return;
+        }
+
+        const iframes = parent.querySelectorAll('iframe');
+        for (let i = 0; i < iframes.length; i++) {
+            const iframe = iframes[i];
+            if (iframe.contentWindow !== event.source) {
+                continue;
+            }
+
+            // Initiate addHasPartMetadata if iframe is a Vimeo embed
+            if (isVimeoEmbed(iframe.src)) {
+                const player = new Vimeo.Player(iframe);
+                player.callMethod('addHasPartMetadata', window.location.href);
+            }
         }
     };
 

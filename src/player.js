@@ -5,7 +5,7 @@ import Promise from 'native-promise-only';
 
 import { storeCallback, getCallbacks, removeCallback, swapCallbacks } from './lib/callbacks';
 import { getMethodName, isDomElement, isVimeoUrl, getVimeoUrl, isNode } from './lib/functions';
-import { getOEmbedParameters, getOEmbedData, createEmbed, initializeEmbeds, resizeEmbeds } from './lib/embed';
+import { getOEmbedParameters, getOEmbedData, createEmbed, initializeEmbeds, resizeEmbeds, initAppendSeoMarkup } from './lib/embed';
 import { parseMessageData, postMessage, processData } from './lib/postmessage';
 import { initializeScreenfull } from './lib/screenfull.js';
 
@@ -146,9 +146,6 @@ class Player {
 
             screenfull.on('fullscreenchange', this.fullscreenchangeHandler);
         }
-
-        // Add chapters to existing VideoObject metadata for Google SEO
-        this.callMethod('addHasPartMetadata', window.location.href);
 
         return this;
     }
@@ -1215,6 +1212,7 @@ if (!isNode) {
     screenfull = initializeScreenfull();
     initializeEmbeds();
     resizeEmbeds();
+    initAppendSeoMarkup();
 }
 
 export default Player;

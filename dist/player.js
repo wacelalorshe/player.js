@@ -730,6 +730,108 @@
   }
 
   /**
+   * @module lib/postmessage
+   */
+  /**
+   * Parse a message received from postMessage.
+   *
+   * @param {*} data The data received from postMessage.
+   * @return {object}
+   */
+
+  function parseMessageData(data) {
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+      } catch (error) {
+        // If the message cannot be parsed, throw the error as a warning
+        console.warn(error);
+        return {};
+      }
+    }
+
+    return data;
+  }
+  /**
+   * Post a message to the specified target.
+   *
+   * @param {Player} player The player object to use.
+   * @param {string} method The API method to call.
+   * @param {object} params The parameters to send to the player.
+   * @return {void}
+   */
+
+  function postMessage(player, method, params) {
+    if (!player.element.contentWindow || !player.element.contentWindow.postMessage) {
+      return;
+    }
+
+    var message = {
+      method: method
+    };
+
+    if (params !== undefined) {
+      message.value = params;
+    } // IE 8 and 9 do not support passing messages, so stringify them
+
+
+    var ieVersion = parseFloat(navigator.userAgent.toLowerCase().replace(/^.*msie (\d+).*$/, '$1'));
+
+    if (ieVersion >= 8 && ieVersion < 10) {
+      message = JSON.stringify(message);
+    }
+
+    player.element.contentWindow.postMessage(message, player.origin);
+  }
+  /**
+   * Parse the data received from a message event.
+   *
+   * @param {Player} player The player that received the message.
+   * @param {(Object|string)} data The message data. Strings will be parsed into JSON.
+   * @return {void}
+   */
+
+  function processData(player, data) {
+    data = parseMessageData(data);
+    var callbacks = [];
+    var param;
+
+    if (data.event) {
+      if (data.event === 'error') {
+        var promises = getCallbacks(player, data.data.method);
+        promises.forEach(function (promise) {
+          var error = new Error(data.data.message);
+          error.name = data.data.name;
+          promise.reject(error);
+          removeCallback(player, data.data.method, promise);
+        });
+      }
+
+      callbacks = getCallbacks(player, "event:".concat(data.event));
+      param = data.data;
+    } else if (data.method) {
+      var callback = shiftCallbacks(player, data.method);
+
+      if (callback) {
+        callbacks.push(callback);
+        param = data.value;
+      }
+    }
+
+    callbacks.forEach(function (callback) {
+      try {
+        if (typeof callback === 'function') {
+          callback.call(player, param);
+          return;
+        }
+
+        callback.resolve(param);
+      } catch (e) {// empty
+      }
+    });
+  }
+
+  /**
    * @module lib/embed
    */
   var oEmbedParameters = ['autopause', 'autoplay', 'background', 'byline', 'color', 'controls', 'dnt', 'height', 'id', 'interactive_params', 'keyboard', 'loop', 'maxheight', 'maxwidth', 'muted', 'playsinline', 'portrait', 'responsive', 'speed', 'texttrack', 'title', 'transparent', 'url', 'width'];
@@ -919,107 +1021,57 @@
 
     window.addEventListener('message', onMessage);
   }
-
   /**
-   * @module lib/postmessage
-   */
-  /**
-   * Parse a message received from postMessage.
+   * Add chapters to existing metadata for Google SEO
    *
-   * @param {*} data The data received from postMessage.
-   * @return {object}
-   */
-
-  function parseMessageData(data) {
-    if (typeof data === 'string') {
-      try {
-        data = JSON.parse(data);
-      } catch (error) {
-        // If the message cannot be parsed, throw the error as a warning
-        console.warn(error);
-        return {};
-      }
-    }
-
-    return data;
-  }
-  /**
-   * Post a message to the specified target.
-   *
-   * @param {Player} player The player object to use.
-   * @param {string} method The API method to call.
-   * @param {object} params The parameters to send to the player.
+   * @param {HTMLElement} [parent=document] The parent element.
    * @return {void}
    */
 
-  function postMessage(player, method, params) {
-    if (!player.element.contentWindow || !player.element.contentWindow.postMessage) {
+  function initAppendSeoMarkup() {
+    var parent = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
+
+    //  Prevent execution if users include the player.js script multiple times.
+    if (window.VimeoSeoTimestamps_) {
       return;
     }
 
-    var message = {
-      method: method
+    window.VimeoSeoTimestamps_ = true;
+
+    var isVimeoEmbed = function isVimeoEmbed(url) {
+      var expr = /^https:\/\/player\.vimeo\.com\/video\/\d{9}\?h=/;
+      return expr.test(url);
     };
 
-    if (params !== undefined) {
-      message.value = params;
-    } // IE 8 and 9 do not support passing messages, so stringify them
+    var onMessage = function onMessage(event) {
+      var data = parseMessageData(event.data);
 
-
-    var ieVersion = parseFloat(navigator.userAgent.toLowerCase().replace(/^.*msie (\d+).*$/, '$1'));
-
-    if (ieVersion >= 8 && ieVersion < 10) {
-      message = JSON.stringify(message);
-    }
-
-    player.element.contentWindow.postMessage(message, player.origin);
-  }
-  /**
-   * Parse the data received from a message event.
-   *
-   * @param {Player} player The player that received the message.
-   * @param {(Object|string)} data The message data. Strings will be parsed into JSON.
-   * @return {void}
-   */
-
-  function processData(player, data) {
-    data = parseMessageData(data);
-    var callbacks = [];
-    var param;
-
-    if (data.event) {
-      if (data.event === 'error') {
-        var promises = getCallbacks(player, data.data.method);
-        promises.forEach(function (promise) {
-          var error = new Error(data.data.message);
-          error.name = data.data.name;
-          promise.reject(error);
-          removeCallback(player, data.data.method, promise);
-        });
+      if (!data || data.event !== 'ready') {
+        return;
       }
 
-      callbacks = getCallbacks(player, "event:".concat(data.event));
-      param = data.data;
-    } else if (data.method) {
-      var callback = shiftCallbacks(player, data.method);
-
-      if (callback) {
-        callbacks.push(callback);
-        param = data.value;
+      if (!isVimeoUrl(event.origin)) {
+        return;
       }
-    }
 
-    callbacks.forEach(function (callback) {
-      try {
-        if (typeof callback === 'function') {
-          callback.call(player, param);
-          return;
+      var iframes = parent.querySelectorAll('iframe');
+
+      for (var i = 0; i < iframes.length; i++) {
+        var iframe = iframes[i];
+
+        if (iframe.contentWindow !== event.source) {
+          continue;
+        } // Initiate addHasPartMetadata if iframe is a Vimeo embed
+
+
+        if (isVimeoEmbed(iframe.src)) {
+          var player = new Vimeo.Player(iframe);
+          player.callMethod('addHasPartMetadata', window.location.href);
         }
-
-        callback.resolve(param);
-      } catch (e) {// empty
       }
-    });
+    };
+
+    window.addEventListener('message', onMessage);
   }
 
   /* MIT License
@@ -1276,10 +1328,8 @@
         };
 
         screenfull.on('fullscreenchange', this.fullscreenchangeHandler);
-      } // Add chapters to existing VideoObject metadata for Google SEO
+      }
 
-
-      this.callMethod('addHasPartMetadata', window.location.href);
       return this;
     }
     /**
@@ -2522,6 +2572,7 @@
     screenfull = initializeScreenfull();
     initializeEmbeds();
     resizeEmbeds();
+    initAppendSeoMarkup();
   }
 
   return Player;
