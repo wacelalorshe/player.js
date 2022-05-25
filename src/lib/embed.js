@@ -251,10 +251,10 @@ export function resizeEmbeds(parent = document) {
                 continue;
             }
 
-            // Initiate addHasPartMetadata if iframe is a Vimeo embed
+            // Initiate appendSeoMarkup if iframe is a Vimeo embed
             if (isVimeoEmbed(iframe.src)) {
                 const player = new Vimeo.Player(iframe);
-                player.callMethod('addHasPartMetadata', window.location.href);
+                player.callMethod('appendSeoMarkup', window.location.href);
             }
         }
     };
