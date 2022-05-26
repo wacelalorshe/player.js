@@ -222,7 +222,7 @@ export function resizeEmbeds(parent = document) {
  * @param {HTMLElement} [parent=document] The parent element.
  * @return {void}
  */
-export function initAppendSeoMarkup(parent = document) {
+export function initAppendVideoMetadata(parent = document) {
     //  Prevent execution if users include the player.js script multiple times.
     if (window.VimeoSeoTimestamps_) {
         return;
@@ -247,10 +247,10 @@ export function initAppendSeoMarkup(parent = document) {
                 continue;
             }
 
-            // Initiate appendSeoMarkup if iframe is a Vimeo embed
+            // Initiate appendVideoMetadata if iframe is a Vimeo embed
             if (isVimeoEmbed(iframe.src)) {
                 const player = new Player(iframe);
-                player.callMethod('appendSeoMarkup', window.location.href);
+                player.callMethod('appendVideoMetadata', window.location.href);
             }
         }
     };

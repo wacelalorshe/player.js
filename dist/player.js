@@ -1039,7 +1039,7 @@
    * @return {void}
    */
 
-  function initAppendSeoMarkup() {
+  function initAppendVideoMetadata() {
     var parent = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
 
     //  Prevent execution if users include the player.js script multiple times.
@@ -1067,12 +1067,12 @@
 
         if (iframe.contentWindow !== event.source) {
           continue;
-        } // Initiate appendSeoMarkup if iframe is a Vimeo embed
+        } // Initiate appendVideoMetadata if iframe is a Vimeo embed
 
 
         if (isVimeoEmbed(iframe.src)) {
           var player = new Player(iframe);
-          player.callMethod('appendSeoMarkup', window.location.href);
+          player.callMethod('appendVideoMetadata', window.location.href);
         }
       }
     };
@@ -2578,7 +2578,7 @@
     screenfull = initializeScreenfull();
     initializeEmbeds();
     resizeEmbeds();
-    initAppendSeoMarkup();
+    initAppendVideoMetadata();
   }
 
   return Player;
