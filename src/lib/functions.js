@@ -67,7 +67,7 @@ export function isVimeoUrl(url) {
  * @param {string} url The url string.
  * @return {boolean}
  */
-export function isVimeoEmbed(url) {
+export function isVimeoEmbedWithHashParam(url) {
     const expr = /^https:\/\/player\.vimeo\.com\/video\/\d+\?h=([a-z0-9]+)/;
     return expr.test(url);
 }

@@ -90,5 +90,5 @@ test('initAppendSeoMarkup is a function and sets a window property', (t) => {
     t.true(typeof initAppendSeoMarkup === 'function');
 
     initAppendSeoMarkup();
-    t.true(window.VimeoSeoTimestamps_);
+    t.true(window.VimeoSeoMetadataAppended);
 });

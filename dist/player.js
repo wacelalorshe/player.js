@@ -93,7 +93,7 @@
    * @return {boolean}
    */
 
-  function isVimeoEmbed(url) {
+  function isVimeoEmbedWithHashParam(url) {
     var expr = /^https:\/\/player\.vimeo\.com\/video\/\d+\?h=([a-z0-9]+)/;
     return expr.test(url);
   }
@@ -1043,11 +1043,11 @@
     var parent = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
 
     //  Prevent execution if users include the player.js script multiple times.
-    if (window.VimeoSeoTimestamps_) {
+    if (window.VimeoSeoMetadataAppended) {
       return;
     }
 
-    window.VimeoSeoTimestamps_ = true;
+    window.VimeoSeoMetadataAppended = true;
 
     var onMessage = function onMessage(event) {
       var data = parseMessageData(event.data);
@@ -1063,14 +1063,11 @@
       var iframes = parent.querySelectorAll('iframe');
 
       for (var i = 0; i < iframes.length; i++) {
-        var iframe = iframes[i];
+        var iframe = iframes[i]; // Initiate appendVideoMetadata if iframe is a Vimeo embed
 
-        if (iframe.contentWindow !== event.source) {
-          continue;
-        } // Initiate appendVideoMetadata if iframe is a Vimeo embed
+        var isValidMessageSource = iframe.contentWindow === event.source;
 
-
-        if (isVimeoEmbed(iframe.src)) {
+        if (isVimeoEmbedWithHashParam(iframe.src) && isValidMessageSource) {
           var player = new Player(iframe);
           player.callMethod('appendVideoMetadata', window.location.href);
         }

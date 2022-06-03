@@ -3,7 +3,7 @@
  */
 
 import Player from '../player';
-import { isVimeoUrl, isVimeoEmbed, getVimeoUrl } from './functions';
+import { isVimeoUrl, isVimeoEmbedWithHashParam, getVimeoUrl } from './functions';
 import { parseMessageData } from './postmessage';
 
 const oEmbedParameters = [
@@ -224,10 +224,10 @@ export function resizeEmbeds(parent = document) {
  */
 export function initAppendVideoMetadata(parent = document) {
     //  Prevent execution if users include the player.js script multiple times.
-    if (window.VimeoSeoTimestamps_) {
+    if (window.VimeoSeoMetadataAppended) {
         return;
     }
-    window.VimeoSeoTimestamps_ = true;
+    window.VimeoSeoMetadataAppended = true;
 
     const onMessage = (event) => {
         const data = parseMessageData(event.data);
@@ -243,12 +243,10 @@ export function initAppendVideoMetadata(parent = document) {
         const iframes = parent.querySelectorAll('iframe');
         for (let i = 0; i < iframes.length; i++) {
             const iframe = iframes[i];
-            if (iframe.contentWindow !== event.source) {
-                continue;
-            }
 
             // Initiate appendVideoMetadata if iframe is a Vimeo embed
-            if (isVimeoEmbed(iframe.src)) {
+            const isValidMessageSource = iframe.contentWindow === event.source;
+            if (isVimeoEmbedWithHashParam(iframe.src) && isValidMessageSource) {
                 const player = new Player(iframe);
                 player.callMethod('appendVideoMetadata', window.location.href);
             }
