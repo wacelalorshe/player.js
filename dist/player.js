@@ -94,7 +94,7 @@
    */
 
   function isVimeoEmbedWithHashParam(url) {
-    var expr = /^https:\/\/player\.vimeo\.com\/video\/\d+\?h=([a-z0-9]+)/;
+    var expr = /^https:\/\/player\.vimeo\.com\/video\/\d+/;
     return expr.test(url);
   }
   /**

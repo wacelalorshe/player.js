@@ -1,6 +1,6 @@
 import test from 'ava';
 import html from './helpers/html';
-import { getMethodName, isDomElement, isInteger, isVimeoUrl, isVimeoEmbedWithHashParam, getVimeoUrl } from '../src/lib/functions';
+import { getMethodName, isDomElement, isInteger, isVimeoUrl, isVimeoEmbed, getVimeoUrl } from '../src/lib/functions';
 
 test('getMethodName properly formats the method name', (t) => {
     t.true(getMethodName('color', 'get') === 'getColor');
@@ -52,13 +52,11 @@ test('isVimeoUrl identifies *.vimeo.com only', (t) => {
     t.true(isVimeoUrl('https://www2vimeo.com') === false);
 });
 
-test('isVimeoEmbedWithHashParam identifies Vimeo embeds only', (t) => {
-    t.true(isVimeoEmbedWithHashParam('https://player.vimeo.com/video/76979871?h=8272103f6e') === true);
-    t.true(isVimeoEmbedWithHashParam('http://player.vimeo.com/video/76979871?h=8272103f6e') === false);
-    t.true(isVimeoEmbedWithHashParam('https://player.vimeo.com/video/76979871?h=') === false);
-    t.true(isVimeoEmbedWithHashParam('https://player.vimeo.com/video/76979871') === false);
-    t.true(isVimeoEmbedWithHashParam('https://player.vimeo.com/video/76979871?q=42') === false);
-    t.true(isVimeoEmbedWithHashParam('player.vimeo.com/video/76979871?h=8272103f6e') === false);
+test('isVimeoEmbed identifies Vimeo embeds only', (t) => {
+    t.true(isVimeoEmbed('https://player.vimeo.com/video/76979871?h=8272103f6e') === true);
+    t.true(isVimeoEmbed('https://player.vimeo.com/video/76979871') === true);
+    t.true(isVimeoEmbed('http://player.vimeo.com/video/76979871?h=8272103f6e') === false);
+    t.true(isVimeoEmbed('http2://not-vimeo.com/video/76979871') === false);
 });
 
 test('getVimeoUrl correctly returns a url from the embed parameters', (t) => {

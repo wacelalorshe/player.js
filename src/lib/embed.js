@@ -3,7 +3,7 @@
  */
 
 import Player from '../player';
-import { isVimeoUrl, isVimeoEmbedWithHashParam, getVimeoUrl } from './functions';
+import { isVimeoUrl, isVimeoEmbed, getVimeoUrl } from './functions';
 import { parseMessageData } from './postmessage';
 
 const oEmbedParameters = [
@@ -246,7 +246,7 @@ export function initAppendVideoMetadata(parent = document) {
 
             // Initiate appendVideoMetadata if iframe is a Vimeo embed
             const isValidMessageSource = iframe.contentWindow === event.source;
-            if (isVimeoEmbedWithHashParam(iframe.src) && isValidMessageSource) {
+            if (isVimeoEmbed(iframe.src) && isValidMessageSource) {
                 const player = new Player(iframe);
                 player.callMethod('appendVideoMetadata', window.location.href);
             }

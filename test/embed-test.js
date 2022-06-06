@@ -1,6 +1,6 @@
 import test from 'ava';
 import html from './helpers/html';
-import { getOEmbedParameters, getOEmbedData, createEmbed, initializeEmbeds, resizeEmbeds, initAppendSeoMarkup } from '../src/lib/embed';
+import { getOEmbedParameters, getOEmbedData, createEmbed, initializeEmbeds, resizeEmbeds, initAppendVideoMetadata } from '../src/lib/embed';
 
 test('getOEmbedParameters retrieves the params from data attributes', (t) => {
     const el = html`<div data-vimeo-id="445351154" data-vimeo-width="640" data-vimeo-autoplay></div>`;
@@ -85,10 +85,10 @@ test('resizeEmbeds is a function and sets a window property', (t) => {
     t.true(window.VimeoPlayerResizeEmbeds_);
 });
 
-test('initAppendSeoMarkup is a function and sets a window property', (t) => {
+test('initAppendVideoMetadata is a function and sets a window property', (t) => {
     t.plan(2);
-    t.true(typeof initAppendSeoMarkup === 'function');
+    t.true(typeof initAppendVideoMetadata === 'function');
 
-    initAppendSeoMarkup();
+    initAppendVideoMetadata();
     t.true(window.VimeoSeoMetadataAppended);
 });
