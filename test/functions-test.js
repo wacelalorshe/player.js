@@ -1,6 +1,6 @@
 import test from 'ava';
 import html from './helpers/html';
-import { getMethodName, isDomElement, isInteger, isVimeoUrl, getVimeoUrl } from '../src/lib/functions';
+import { getMethodName, isDomElement, isInteger, isVimeoUrl, isVimeoEmbed, getVimeoUrl } from '../src/lib/functions';
 
 test('getMethodName properly formats the method name', (t) => {
     t.true(getMethodName('color', 'get') === 'getColor');
@@ -45,17 +45,24 @@ test('isVimeoUrl identifies *.vimeo.com only', (t) => {
     t.true(isVimeoUrl('https://notvimeo.com') === false);
     t.true(isVimeoUrl('https://vimeo.someone.com') === false);
     t.true(isVimeoUrl('https://player.vimeo.com/video/123') === true);
-    t.true(isVimeoUrl('https://vimeo.com/336812660') === true);
+    t.true(isVimeoUrl('https://vimeo.com/445351154') === true);
     t.true(isVimeoUrl('https://vimeo.com.evil.net') === false);
     t.true(isVimeoUrl('http://player.vimeo.com.evil.com') === false);
     t.true(isVimeoUrl('https://player.vimeozcom') === false);
     t.true(isVimeoUrl('https://www2vimeo.com') === false);
 });
 
+test('isVimeoEmbed identifies Vimeo embeds only', (t) => {
+    t.true(isVimeoEmbed('https://player.vimeo.com/video/76979871?h=8272103f6e') === true);
+    t.true(isVimeoEmbed('https://player.vimeo.com/video/76979871') === true);
+    t.true(isVimeoEmbed('http://player.vimeo.com/video/76979871?h=8272103f6e') === false);
+    t.true(isVimeoEmbed('http2://not-vimeo.com/video/76979871') === false);
+});
+
 test('getVimeoUrl correctly returns a url from the embed parameters', (t) => {
-    t.true(getVimeoUrl({ id: 336812660 }) === 'https://vimeo.com/336812660');
-    t.true(getVimeoUrl({ url: 'http://vimeo.com/336812660' }) === 'https://vimeo.com/336812660');
-    t.true(getVimeoUrl({ url: 'https://vimeo.com/336812660' }) === 'https://vimeo.com/336812660');
+    t.true(getVimeoUrl({ id: 445351154 }) === 'https://vimeo.com/445351154');
+    t.true(getVimeoUrl({ url: 'http://vimeo.com/445351154' }) === 'https://vimeo.com/445351154');
+    t.true(getVimeoUrl({ url: 'https://vimeo.com/445351154' }) === 'https://vimeo.com/445351154');
 
 });
 

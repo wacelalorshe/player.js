@@ -2,7 +2,9 @@
  * @module lib/embed
  */
 
-import { isVimeoUrl, getVimeoUrl } from './functions';
+import Player from '../player';
+import { isVimeoUrl, isVimeoEmbed, getVimeoUrl } from './functions';
+import { parseMessageData } from './postmessage';
 
 const oEmbedParameters = [
     'autopause',
@@ -208,6 +210,46 @@ export function resizeEmbeds(parent = document) {
             space.style.paddingBottom = `${event.data.data[0].bottom}px`;
 
             break;
+        }
+    };
+
+    window.addEventListener('message', onMessage);
+}
+
+/**
+ * Add chapters to existing metadata for Google SEO
+ *
+ * @param {HTMLElement} [parent=document] The parent element.
+ * @return {void}
+ */
+export function initAppendVideoMetadata(parent = document) {
+    //  Prevent execution if users include the player.js script multiple times.
+    if (window.VimeoSeoMetadataAppended) {
+        return;
+    }
+    window.VimeoSeoMetadataAppended = true;
+
+    const onMessage = (event) => {
+        const data = parseMessageData(event.data);
+
+        if (!data || data.event !== 'ready') {
+            return;
+        }
+
+        if (!isVimeoUrl(event.origin)) {
+            return;
+        }
+
+        const iframes = parent.querySelectorAll('iframe');
+        for (let i = 0; i < iframes.length; i++) {
+            const iframe = iframes[i];
+
+            // Initiate appendVideoMetadata if iframe is a Vimeo embed
+            const isValidMessageSource = iframe.contentWindow === event.source;
+            if (isVimeoEmbed(iframe.src) && isValidMessageSource) {
+                const player = new Player(iframe);
+                player.callMethod('appendVideoMetadata', window.location.href);
+            }
         }
     };
 
