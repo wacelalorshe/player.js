@@ -1,4 +1,4 @@
-/*! @vimeo/player v2.16.4 | (c) 2022 Vimeo | MIT License | https://github.com/vimeo/player.js */
+/*! @vimeo/player v2.17.0 | (c) 2022 Vimeo | MIT License | https://github.com/vimeo/player.js */
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -87,7 +87,7 @@ function isVimeoUrl(url) {
  * @return {boolean}
  */
 
-function isVimeoEmbedWithHashParam(url) {
+function isVimeoEmbed(url) {
   var expr = /^https:\/\/player\.vimeo\.com\/video\/\d+/;
   return expr.test(url);
 }
@@ -1061,7 +1061,7 @@ function initAppendVideoMetadata() {
 
       var isValidMessageSource = iframe.contentWindow === event.source;
 
-      if (isVimeoEmbedWithHashParam(iframe.src) && isValidMessageSource) {
+      if (isVimeoEmbed(iframe.src) && isValidMessageSource) {
         var player = new Player(iframe);
         player.callMethod('appendVideoMetadata', window.location.href);
       }
