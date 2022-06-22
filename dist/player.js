@@ -741,108 +741,6 @@
   }
 
   /**
-   * @module lib/postmessage
-   */
-  /**
-   * Parse a message received from postMessage.
-   *
-   * @param {*} data The data received from postMessage.
-   * @return {object}
-   */
-
-  function parseMessageData(data) {
-    if (typeof data === 'string') {
-      try {
-        data = JSON.parse(data);
-      } catch (error) {
-        // If the message cannot be parsed, throw the error as a warning
-        console.warn(error);
-        return {};
-      }
-    }
-
-    return data;
-  }
-  /**
-   * Post a message to the specified target.
-   *
-   * @param {Player} player The player object to use.
-   * @param {string} method The API method to call.
-   * @param {object} params The parameters to send to the player.
-   * @return {void}
-   */
-
-  function postMessage(player, method, params) {
-    if (!player.element.contentWindow || !player.element.contentWindow.postMessage) {
-      return;
-    }
-
-    var message = {
-      method: method
-    };
-
-    if (params !== undefined) {
-      message.value = params;
-    } // IE 8 and 9 do not support passing messages, so stringify them
-
-
-    var ieVersion = parseFloat(navigator.userAgent.toLowerCase().replace(/^.*msie (\d+).*$/, '$1'));
-
-    if (ieVersion >= 8 && ieVersion < 10) {
-      message = JSON.stringify(message);
-    }
-
-    player.element.contentWindow.postMessage(message, player.origin);
-  }
-  /**
-   * Parse the data received from a message event.
-   *
-   * @param {Player} player The player that received the message.
-   * @param {(Object|string)} data The message data. Strings will be parsed into JSON.
-   * @return {void}
-   */
-
-  function processData(player, data) {
-    data = parseMessageData(data);
-    var callbacks = [];
-    var param;
-
-    if (data.event) {
-      if (data.event === 'error') {
-        var promises = getCallbacks(player, data.data.method);
-        promises.forEach(function (promise) {
-          var error = new Error(data.data.message);
-          error.name = data.data.name;
-          promise.reject(error);
-          removeCallback(player, data.data.method, promise);
-        });
-      }
-
-      callbacks = getCallbacks(player, "event:".concat(data.event));
-      param = data.data;
-    } else if (data.method) {
-      var callback = shiftCallbacks(player, data.method);
-
-      if (callback) {
-        callbacks.push(callback);
-        param = data.value;
-      }
-    }
-
-    callbacks.forEach(function (callback) {
-      try {
-        if (typeof callback === 'function') {
-          callback.call(player, param);
-          return;
-        }
-
-        callback.resolve(param);
-      } catch (e) {// empty
-      }
-    });
-  }
-
-  /**
    * @module lib/embed
    */
   var oEmbedParameters = ['autopause', 'autoplay', 'background', 'byline', 'color', 'controls', 'dnt', 'height', 'id', 'interactive_params', 'keyboard', 'loop', 'maxheight', 'maxwidth', 'muted', 'playsinline', 'portrait', 'responsive', 'speed', 'texttrack', 'title', 'transparent', 'url', 'width'];
@@ -1050,13 +948,11 @@
     window.VimeoSeoMetadataAppended = true;
 
     var onMessage = function onMessage(event) {
-      var data = parseMessageData(event.data);
-
-      if (!data || data.event !== 'ready') {
+      if (!isVimeoUrl(event.origin)) {
         return;
       }
 
-      if (!isVimeoUrl(event.origin)) {
+      if (!event.data || event.data.event !== 'ready') {
         return;
       }
 
@@ -1075,6 +971,108 @@
     };
 
     window.addEventListener('message', onMessage);
+  }
+
+  /**
+   * @module lib/postmessage
+   */
+  /**
+   * Parse a message received from postMessage.
+   *
+   * @param {*} data The data received from postMessage.
+   * @return {object}
+   */
+
+  function parseMessageData(data) {
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+      } catch (error) {
+        // If the message cannot be parsed, throw the error as a warning
+        console.warn(error);
+        return {};
+      }
+    }
+
+    return data;
+  }
+  /**
+   * Post a message to the specified target.
+   *
+   * @param {Player} player The player object to use.
+   * @param {string} method The API method to call.
+   * @param {object} params The parameters to send to the player.
+   * @return {void}
+   */
+
+  function postMessage(player, method, params) {
+    if (!player.element.contentWindow || !player.element.contentWindow.postMessage) {
+      return;
+    }
+
+    var message = {
+      method: method
+    };
+
+    if (params !== undefined) {
+      message.value = params;
+    } // IE 8 and 9 do not support passing messages, so stringify them
+
+
+    var ieVersion = parseFloat(navigator.userAgent.toLowerCase().replace(/^.*msie (\d+).*$/, '$1'));
+
+    if (ieVersion >= 8 && ieVersion < 10) {
+      message = JSON.stringify(message);
+    }
+
+    player.element.contentWindow.postMessage(message, player.origin);
+  }
+  /**
+   * Parse the data received from a message event.
+   *
+   * @param {Player} player The player that received the message.
+   * @param {(Object|string)} data The message data. Strings will be parsed into JSON.
+   * @return {void}
+   */
+
+  function processData(player, data) {
+    data = parseMessageData(data);
+    var callbacks = [];
+    var param;
+
+    if (data.event) {
+      if (data.event === 'error') {
+        var promises = getCallbacks(player, data.data.method);
+        promises.forEach(function (promise) {
+          var error = new Error(data.data.message);
+          error.name = data.data.name;
+          promise.reject(error);
+          removeCallback(player, data.data.method, promise);
+        });
+      }
+
+      callbacks = getCallbacks(player, "event:".concat(data.event));
+      param = data.data;
+    } else if (data.method) {
+      var callback = shiftCallbacks(player, data.method);
+
+      if (callback) {
+        callbacks.push(callback);
+        param = data.value;
+      }
+    }
+
+    callbacks.forEach(function (callback) {
+      try {
+        if (typeof callback === 'function') {
+          callback.call(player, param);
+          return;
+        }
+
+        callback.resolve(param);
+      } catch (e) {// empty
+      }
+    });
   }
 
   /* MIT License
