@@ -4,6 +4,7 @@
 
 import Player from '../player';
 import { isVimeoUrl, isVimeoEmbed, getVimeoUrl } from './functions';
+import { parseMessageData } from './postmessage';
 
 const oEmbedParameters = [
     'autopause',
@@ -233,7 +234,8 @@ export function initAppendVideoMetadata(parent = document) {
             return;
         }
 
-        if (!event.data || event.data.event !== 'ready') {
+        const data = parseMessageData(event.data);
+        if (!data || data.event !== 'ready') {
             return;
         }
 
