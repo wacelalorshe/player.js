@@ -230,13 +230,12 @@ export function initAppendVideoMetadata(parent = document) {
     window.VimeoSeoMetadataAppended = true;
 
     const onMessage = (event) => {
-        const data = parseMessageData(event.data);
-
-        if (!data || data.event !== 'ready') {
+        if (!isVimeoUrl(event.origin)) {
             return;
         }
 
-        if (!isVimeoUrl(event.origin)) {
+        const data = parseMessageData(event.data);
+        if (!data || data.event !== 'ready') {
             return;
         }
 

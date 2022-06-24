@@ -1044,13 +1044,13 @@ function initAppendVideoMetadata() {
   window.VimeoSeoMetadataAppended = true;
 
   var onMessage = function onMessage(event) {
-    var data = parseMessageData(event.data);
-
-    if (!data || data.event !== 'ready') {
+    if (!isVimeoUrl(event.origin)) {
       return;
     }
 
-    if (!isVimeoUrl(event.origin)) {
+    var data = parseMessageData(event.data);
+
+    if (!data || data.event !== 'ready') {
       return;
     }
 
