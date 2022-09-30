@@ -1115,9 +1115,9 @@ function checkUrlTimeParam() {
           var player = new Player(iframe);
           player.getVideoId().then(function (videoId) {
             var matches = new RegExp("[?&]vimeo_t_".concat(videoId, "=([^&#]*)")).exec(window.location.href);
-            var sec = decodeURI(matches[1]);
 
-            if (sec) {
+            if (matches && matches[1]) {
+              var sec = decodeURI(matches[1]);
               player.setCurrentTime(sec);
             }
 

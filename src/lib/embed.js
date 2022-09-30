@@ -291,14 +291,17 @@ export function checkUrlTimeParam(parent = document) {
 
             if (isVimeoEmbed(iframe.src) && isValidMessageSource) {
                 const player = new Player(iframe);
-                player.getVideoId().then((videoId) => {
-                    const matches = new RegExp(`[?&]vimeo_t_${videoId}=([^&#]*)`).exec(window.location.href);
-                    const sec = decodeURI(matches[1]);
-                    if (sec) {
-                        player.setCurrentTime(sec);
-                    }
-                    return;
-                }).catch(handleError);
+                player
+                    .getVideoId()
+                    .then((videoId) => {
+                        const matches = new RegExp(`[?&]vimeo_t_${videoId}=([^&#]*)`).exec(window.location.href);
+                        if (matches && matches[1]) {
+                            const sec = decodeURI(matches[1]);
+                            player.setCurrentTime(sec);
+                        }
+                        return;
+                    })
+                    .catch(handleError);
             }
         }
     };
