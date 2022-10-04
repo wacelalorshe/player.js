@@ -2,7 +2,8 @@
  * @module lib/embed
  */
 
-import { isVimeoUrl, getVimeoUrl } from './functions';
+import Player from '../player';
+import { isVimeoUrl, isVimeoEmbed, getVimeoUrl } from './functions';
 import { parseMessageData } from './postmessage';
 
 const oEmbedParameters = [
@@ -218,10 +219,10 @@ export function resizeEmbeds(parent = document) {
 /**
  * Add chapters to existing metadata for Google SEO
  *
- * @param {Object} [player] The player object.
+ * @param {HTMLElement} [parent=document] The parent element.
  * @return {void}
  */
-export function initAppendVideoMetadata(player) {
+export function initAppendVideoMetadata(parent = document) {
     //  Prevent execution if users include the player.js script multiple times.
     if (window.VimeoSeoMetadataAppended) {
         return;
@@ -238,8 +239,16 @@ export function initAppendVideoMetadata(player) {
             return;
         }
 
-        if (player.element.contentWindow === event.source) {
-            player.callMethod('appendVideoMetadata', window.location.href);
+        const iframes = parent.querySelectorAll('iframe');
+        for (let i = 0; i < iframes.length; i++) {
+            const iframe = iframes[i];
+
+            // Initiate appendVideoMetadata if iframe is a Vimeo embed
+            const isValidMessageSource = iframe.contentWindow === event.source;
+            if (isVimeoEmbed(iframe.src) && isValidMessageSource) {
+                const player = new Player(iframe);
+                player.callMethod('appendVideoMetadata', window.location.href);
+            }
         }
     };
 
@@ -249,10 +258,10 @@ export function initAppendVideoMetadata(player) {
 /**
  * Seek to time indicated by vimeo_t query parameter if present in URL
  *
- * @param {Object} [player] The player object.
+ * @param {HTMLElement} [parent=document] The parent element.
  * @return {void}
  */
-export function checkUrlTimeParam(player) {
+export function checkUrlTimeParam(parent = document) {
     //  Prevent execution if users include the player.js script multiple times.
     if (window.VimeoCheckedUrlTimeParam) {
         return;
@@ -261,7 +270,7 @@ export function checkUrlTimeParam(player) {
 
     const handleError = (error) => {
         if ('console' in window && console.error) {
-            console.error(`There was an error getting video id: ${error}`);
+            console.error(`There was an error getting video Id: ${error}`);
         }
     };
 
@@ -275,18 +284,25 @@ export function checkUrlTimeParam(player) {
             return;
         }
 
-        if (player.element.contentWindow === event.source) {
-            player
-                .getVideoId()
-                .then((videoId) => {
-                    const matches = new RegExp(`[?&]vimeo_t_${videoId}=([^&#]*)`).exec(window.location.href);
-                    if (matches && matches[1]) {
-                        const sec = decodeURI(matches[1]);
-                        player.setCurrentTime(sec);
-                    }
-                    return;
-                })
-                .catch(handleError);
+        const iframes = parent.querySelectorAll('iframe');
+        for (let i = 0; i < iframes.length; i++) {
+            const iframe = iframes[i];
+            const isValidMessageSource = iframe.contentWindow === event.source;
+
+            if (isVimeoEmbed(iframe.src) && isValidMessageSource) {
+                const player = new Player(iframe);
+                player
+                    .getVideoId()
+                    .then((videoId) => {
+                        const matches = new RegExp(`[?&]vimeo_t_${videoId}=([^&#]*)`).exec(window.location.href);
+                        if (matches && matches[1]) {
+                            const sec = decodeURI(matches[1]);
+                            player.setCurrentTime(sec);
+                        }
+                        return;
+                    })
+                    .catch(handleError);
+            }
         }
     };
 
