@@ -87,17 +87,6 @@
     return /^(https?:)?\/\/((player|www)\.)?vimeo\.com(?=$|\/)/.test(url);
   }
   /**
-   * Check to see if the URL is for a Vimeo embed.
-   *
-   * @param {string} url The url string.
-   * @return {boolean}
-   */
-
-  function isVimeoEmbed(url) {
-    var expr = /^https:\/\/player\.vimeo\.com\/video\/\d+/;
-    return expr.test(url);
-  }
-  /**
    * Get the Vimeo URL from an element.
    * The element must have either a data-vimeo-id or data-vimeo-url attribute.
    *
@@ -1035,13 +1024,11 @@
   /**
    * Add chapters to existing metadata for Google SEO
    *
-   * @param {HTMLElement} [parent=document] The parent element.
+   * @param {Object} [player] The player object.
    * @return {void}
    */
 
-  function initAppendVideoMetadata() {
-    var parent = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
-
+  function initAppendVideoMetadata(player) {
     //  Prevent execution if users include the player.js script multiple times.
     if (window.VimeoSeoMetadataAppended) {
       return;
@@ -1060,17 +1047,8 @@
         return;
       }
 
-      var iframes = parent.querySelectorAll('iframe');
-
-      for (var i = 0; i < iframes.length; i++) {
-        var iframe = iframes[i]; // Initiate appendVideoMetadata if iframe is a Vimeo embed
-
-        var isValidMessageSource = iframe.contentWindow === event.source;
-
-        if (isVimeoEmbed(iframe.src) && isValidMessageSource) {
-          var player = new Player(iframe);
-          player.callMethod('appendVideoMetadata', window.location.href);
-        }
+      if (player.element.contentWindow === event.source) {
+        player.callMethod('appendVideoMetadata', window.location.href);
       }
     };
 
@@ -1079,13 +1057,11 @@
   /**
    * Seek to time indicated by vimeo_t query parameter if present in URL
    *
-   * @param {HTMLElement} [parent=document] The parent element.
+   * @param {Object} [player] The player object.
    * @return {void}
    */
 
-  function checkUrlTimeParam() {
-    var parent = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : document;
-
+  function checkUrlTimeParam(player) {
     //  Prevent execution if users include the player.js script multiple times.
     if (window.VimeoCheckedUrlTimeParam) {
       return;
@@ -1095,7 +1071,7 @@
 
     var handleError = function handleError(error) {
       if ('console' in window && console.error) {
-        console.error("There was an error getting video Id: ".concat(error));
+        console.error("There was an error getting video id: ".concat(error));
       }
     };
 
@@ -1110,27 +1086,17 @@
         return;
       }
 
-      var iframes = parent.querySelectorAll('iframe');
+      if (player.element.contentWindow === event.source) {
+        player.getVideoId().then(function (videoId) {
+          var matches = new RegExp("[?&]vimeo_t_".concat(videoId, "=([^&#]*)")).exec(window.location.href);
 
-      for (var i = 0; i < iframes.length; i++) {
-        var iframe = iframes[i];
-        var isValidMessageSource = iframe.contentWindow === event.source;
+          if (matches && matches[1]) {
+            var sec = decodeURI(matches[1]);
+            player.setCurrentTime(sec);
+          }
 
-        if (isVimeoEmbed(iframe.src) && isValidMessageSource) {
-          (function () {
-            var player = new Player(iframe);
-            player.getVideoId().then(function (videoId) {
-              var matches = new RegExp("[?&]vimeo_t_".concat(videoId, "=([^&#]*)")).exec(window.location.href);
-
-              if (matches && matches[1]) {
-                var sec = decodeURI(matches[1]);
-                player.setCurrentTime(sec);
-              }
-
-              return;
-            }).catch(handleError);
-          })();
-        }
+          return;
+        }).catch(handleError);
       }
     };
 
@@ -1393,6 +1359,8 @@
         screenfull.on('fullscreenchange', this.fullscreenchangeHandler);
       }
 
+      initAppendVideoMetadata(this);
+      checkUrlTimeParam(this);
       return this;
     }
     /**
@@ -2635,8 +2603,6 @@
     screenfull = initializeScreenfull();
     initializeEmbeds();
     resizeEmbeds();
-    initAppendVideoMetadata();
-    checkUrlTimeParam();
   }
 
   return Player;

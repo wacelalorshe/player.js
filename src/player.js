@@ -155,6 +155,9 @@ class Player {
             screenfull.on('fullscreenchange', this.fullscreenchangeHandler);
         }
 
+        initAppendVideoMetadata(this);
+        checkUrlTimeParam(this);
+
         return this;
     }
 
@@ -1220,8 +1223,6 @@ if (!isNode) {
     screenfull = initializeScreenfull();
     initializeEmbeds();
     resizeEmbeds();
-    initAppendVideoMetadata();
-    checkUrlTimeParam();
 }
 
 export default Player;
