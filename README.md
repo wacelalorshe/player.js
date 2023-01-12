@@ -335,7 +335,7 @@ option             | default  | description
 ------------------ | -------- | -----------
 id _or_ url        |          | **Required.** Either the id or the URL of the video. Note that if the video [privacy settings](https://vimeo.zendesk.com/hc/en-us/articles/224817847-Privacy-settings-overview) are "Private", instead of an id, a URL that includes the `h` parameter must be provided.
 autopause          | `true`   | Pause this video automatically when another one plays.
-auto_pip           |          | Enable the browser to enter picture-in-picture mode automatically when switching tabs or windows, where supported.
+autopip            |          | Enable the browser to enter picture-in-picture mode automatically when switching tabs or windows, where supported.
 autoplay           | `false`  | Automatically start playback of the video. Note that this won’t work on some devices.
 background         | `false`  | Enable the player's background mode which hides the controls, autoplays and loops the video (available to  Plus, PRO, or Business members).
 byline             | `true`   | Show the byline on the video.
