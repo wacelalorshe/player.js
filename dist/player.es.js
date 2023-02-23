@@ -1,4 +1,4 @@
-/*! @vimeo/player v2.18.0 | (c) 2022 Vimeo | MIT License | https://github.com/vimeo/player.js */
+/*! @vimeo/player v2.18.0 | (c) 2023 Vimeo | MIT License | https://github.com/vimeo/player.js */
 function _classCallCheck(instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -138,9 +138,9 @@ function createCommonjsModule(fn, module) {
 }
 
 /*!
- * weakmap-polyfill v2.0.4 - ECMAScript6 WeakMap polyfill
+ * weakmap-polyfill v2.0.1 - ECMAScript6 WeakMap polyfill
  * https://github.com/polygonplanet/weakmap-polyfill
- * Copyright (c) 2015-2021 polygonplanet <polygon.planet.aqua@gmail.com>
+ * Copyright (c) 2015-2020 Polygon Planet <polygon.planet.aqua@gmail.com>
  * @license MIT
  */
 (function (self) {
@@ -151,17 +151,8 @@ function createCommonjsModule(fn, module) {
 
   var hasOwnProperty = Object.prototype.hasOwnProperty;
 
-  var hasDefine = Object.defineProperty && function () {
-    try {
-      // Avoid IE8's broken Object.defineProperty
-      return Object.defineProperty({}, 'x', {
-        value: 1
-      }).x === 1;
-    } catch (e) {}
-  }();
-
   var defineProperty = function (object, name, value) {
-    if (hasDefine) {
+    if (Object.defineProperty) {
       Object.defineProperty(object, name, {
         configurable: true,
         writable: true,
@@ -276,7 +267,7 @@ function createCommonjsModule(fn, module) {
   function isObject(x) {
     return Object(x) === x;
   }
-})(typeof globalThis !== 'undefined' ? globalThis : typeof self !== 'undefined' ? self : typeof window !== 'undefined' ? window : typeof commonjsGlobal !== 'undefined' ? commonjsGlobal : commonjsGlobal);
+})(typeof self !== 'undefined' ? self : typeof window !== 'undefined' ? window : typeof commonjsGlobal !== 'undefined' ? commonjsGlobal : commonjsGlobal);
 
 var npo_src = createCommonjsModule(function (module) {
 /*! Native Promise Only
@@ -287,7 +278,7 @@ var npo_src = createCommonjsModule(function (module) {
   // special form of UMD for polyfilling across evironments
   context[name] = context[name] || definition();
 
-  if ( module.exports) {
+  if (module.exports) {
     module.exports = context[name];
   }
 })("Promise", typeof commonjsGlobal != "undefined" ? commonjsGlobal : commonjsGlobal, function DEF() {
@@ -839,7 +830,7 @@ function processData(player, data) {
 /**
  * @module lib/embed
  */
-var oEmbedParameters = ['autopause', 'autoplay', 'background', 'byline', 'color', 'controls', 'dnt', 'height', 'id', 'interactive_params', 'keyboard', 'loop', 'maxheight', 'maxwidth', 'muted', 'playsinline', 'portrait', 'responsive', 'speed', 'texttrack', 'title', 'transparent', 'url', 'width'];
+var oEmbedParameters = ['autopause', 'autoplay', 'background', 'byline', 'color', 'color_one', 'color_two', 'color_three', 'color_four', 'controls', 'dnt', 'height', 'id', 'interactive_params', 'keyboard', 'loop', 'maxheight', 'maxwidth', 'muted', 'playsinline', 'portrait', 'responsive', 'speed', 'texttrack', 'title', 'transparent', 'url', 'width'];
 /**
  * Get the 'data-vimeo'-prefixed attributes from an element as an object.
  *
@@ -2044,14 +2035,14 @@ var Player = /*#__PURE__*/function () {
       return this.get('currentChapter');
     }
     /**
-     * A promise to get the color of the player.
+     * A promise to get the accent color of the player.
      *
      * @promise GetColorPromise
      * @fulfill {string} The hex color of the player.
      */
 
     /**
-     * Get the color for this player.
+     * Get the accent color for this player. Note this is deprecated in place of `getColorTwo`.
      *
      * @return {GetColorPromise}
      */
@@ -2062,7 +2053,79 @@ var Player = /*#__PURE__*/function () {
       return this.get('color');
     }
     /**
-     * A promise to set the color of the player.
+     * A promise to get the primary color of the player.
+     *
+     * @promise GetColorOnePromise
+     * @fulfill {string} The hex color of the player.
+     */
+
+    /**
+     * Get the primary color for this player.
+     *
+     * @return {GetColorOnePromise}
+     */
+
+  }, {
+    key: "getColorOne",
+    value: function getColorOne() {
+      return this.get('colorOne');
+    }
+    /**
+     * A promise to get the accent color of the player.
+     *
+     * @promise GetColorTwoPromise
+     * @fulfill {string} The hex color of the player.
+     */
+
+    /**
+     * Get the accent color for this player. Note this should be used in place of `getColor`.
+     *
+     * @return {GetColorTwoPromise}
+     */
+
+  }, {
+    key: "getColorTwo",
+    value: function getColorTwo() {
+      return this.get('colorTwo');
+    }
+    /**
+     * A promise to get the text/icon color of the player.
+     *
+     * @promise GetColorThreePromise
+     * @fulfill {string} The hex color of the player.
+     */
+
+    /**
+     * Get the text/icon color for this player.
+     *
+     * @return {GetColorThreePromise}
+     */
+
+  }, {
+    key: "getColorThree",
+    value: function getColorThree() {
+      return this.get('colorThree');
+    }
+    /**
+     * A promise to get the background color of the player.
+     *
+     * @promise GetColorFourPromise
+     * @fulfill {string} The hex color of the player.
+     */
+
+    /**
+     * Get the background color for this player.
+     *
+     * @return {GetColorFourPromise}
+     */
+
+  }, {
+    key: "getColorFour",
+    value: function getColorFour() {
+      return this.get('colorFour');
+    }
+    /**
+     * A promise to set the accent color of the player.
      *
      * @promise SetColorPromise
      * @fulfill {string} The color was successfully set.
@@ -2074,9 +2137,10 @@ var Player = /*#__PURE__*/function () {
      */
 
     /**
-     * Set the color of this player to a hex or rgb string. Setting the
+     * Set the accent color of this player to a hex or rgb string. Setting the
      * color may fail if the owner of the video has set their embed
      * preferences to force a specific color.
+     * Note this is deprecated in place of `setColorTwo`.
      *
      * @param {string} color The hex or rgb color string to set.
      * @return {SetColorPromise}
@@ -2086,6 +2150,111 @@ var Player = /*#__PURE__*/function () {
     key: "setColor",
     value: function setColor(color) {
       return this.set('color', color);
+    }
+    /**
+     * A promise to set the primary color of the player.
+     *
+     * @promise SetColorOnePromise
+     * @fulfill {string} The color was successfully set.
+     * @reject {TypeError} The string was not a valid hex or rgb color.
+     * @reject {ContrastError} The color was set, but the contrast is
+     *         outside of the acceptable range.
+     * @reject {EmbedSettingsError} The owner of the player has chosen to
+     *         use a specific color.
+     */
+
+    /**
+     * Set the primary color of this player to a hex or rgb string. Setting the
+     * color may fail if the owner of the video has set their embed
+     * preferences to force a specific color.
+     *
+     * @param {string} color The hex or rgb color string to set.
+     * @return {SetColorOnePromise}
+     */
+
+  }, {
+    key: "setColorOne",
+    value: function setColorOne(color) {
+      return this.set('colorOne', color);
+    }
+    /**
+     * A promise to set the accent color of the player.
+     *
+     * @promise SetColorTwoPromise
+     * @fulfill {string} The color was successfully set.
+     * @reject {TypeError} The string was not a valid hex or rgb color.
+     * @reject {ContrastError} The color was set, but the contrast is
+     *         outside of the acceptable range.
+     * @reject {EmbedSettingsError} The owner of the player has chosen to
+     *         use a specific color.
+     */
+
+    /**
+     * Set the accent color of this player to a hex or rgb string. Setting the
+     * color may fail if the owner of the video has set their embed
+     * preferences to force a specific color.
+     * Note this should be used in place of `setColor`.
+     *
+     * @param {string} color The hex or rgb color string to set.
+     * @return {SetColorTwoPromise}
+     */
+
+  }, {
+    key: "setColorTwo",
+    value: function setColorTwo(color) {
+      return this.set('colorTwo', color);
+    }
+    /**
+     * A promise to set the text/icon color of the player.
+     *
+     * @promise SetColorThreePromise
+     * @fulfill {string} The color was successfully set.
+     * @reject {TypeError} The string was not a valid hex or rgb color.
+     * @reject {ContrastError} The color was set, but the contrast is
+     *         outside of the acceptable range.
+     * @reject {EmbedSettingsError} The owner of the player has chosen to
+     *         use a specific color.
+     */
+
+    /**
+     * Set the text/icon color of this player to a hex or rgb string. Setting the
+     * color may fail if the owner of the video has set their embed
+     * preferences to force a specific color.
+     *
+     * @param {string} color The hex or rgb color string to set.
+     * @return {SetColorThreePromise}
+     */
+
+  }, {
+    key: "setColorThree",
+    value: function setColorThree(color) {
+      return this.set('colorThree', color);
+    }
+    /**
+     * A promise to set the background color of the player.
+     *
+     * @promise SetColorFourPromise
+     * @fulfill {string} The color was successfully set.
+     * @reject {TypeError} The string was not a valid hex or rgb color.
+     * @reject {ContrastError} The color was set, but the contrast is
+     *         outside of the acceptable range.
+     * @reject {EmbedSettingsError} The owner of the player has chosen to
+     *         use a specific color.
+     */
+
+    /**
+     * Set the background color of this player to a hex or rgb string. Setting the
+     * color may fail if the owner of the video has set their embed
+     * preferences to force a specific color.
+     *
+     * @param {string} color The hex or rgb color string to set.
+     * @return {SetColorFourPromise}
+     */
+
+  }, {
+    key: "setColorFour",
+    value: function setColorFour(color) {
+      return this.set('colorFour', color);
     }
     /**
      * A representation of a cue point.
@@ -2298,11 +2467,11 @@ var Player = /*#__PURE__*/function () {
      * A promise to get the playback rate of the player.
      *
      * @promise GetPlaybackRatePromise
-     * @fulfill {number} The playback rate of the player on a scale from 0.5 to 2.
+     * @fulfill {number} The playback rate of the player on a scale from 0 to 2.
      */
 
     /**
-     * Get the playback rate of the player on a scale from `0.5` to `2`.
+     * Get the playback rate of the player on a scale from `0` to `2`.
      *
      * @return {GetPlaybackRatePromise}
      */
@@ -2317,11 +2486,11 @@ var Player = /*#__PURE__*/function () {
      *
      * @promise SetPlaybackRatePromise
      * @fulfill {number} The playback rate was set.
-     * @reject {RangeError} The playback rate was less than 0.5 or greater than 2.
+     * @reject {RangeError} The playback rate was less than 0 or greater than 2.
      */
 
     /**
-     * Set the playback rate of the player on a scale from `0.5` to `2`. When set
+     * Set the playback rate of the player on a scale from `0` to `2`. When set
      * via the API, the playback rate will not be synchronized to other
      * players or stored as the viewer's preference.
      *

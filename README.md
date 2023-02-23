@@ -181,7 +181,15 @@ it will also import the Player constructor directly:
     + [getChapters](#getchapters-promisearray-error)
     + [getCurrentChapter](#getcurrentchapter-promiseobject-error)
     + [getColor](#getcolor-promisestring-error)
+    + [getColorOne](#getcolorone-promisestring-error)
+    + [getColorTwo](#getcolortwo-promisestring-error)
+    + [getColorThree](#getcolorthree-promisestring-error)
+    + [getColorFour](#getcolorfour-promisestring-error)
     + [setColor](#setcolorcolor-string-promisestring-contrasterrortypeerrorerror)
+    + [setColorOne](#setcoloronecolor-string-promisestring-contrasterrortypeerrorerror)
+    + [setColorTwo](#setcolortwocolor-string-promisestring-contrasterrortypeerrorerror)
+    + [setColorThree](#setcolorthreecolor-string-promisestring-contrasterrortypeerrorerror)
+    + [setColorFour](#setcolorfourcolor-string-promisestring-contrasterrortypeerrorerror)
     + [addCuePoint](#addcuepointtime-number-data-object-promisestring-unsupportederrorrangeerrorerror)
     + [removeCuePoint](#removecuepointid-string-promisestring-unsupportederrorinvalidcuepointerror)
     + [getCuePoints](#getcuepoints-promisearray-unsupportederrorerror)
@@ -339,7 +347,11 @@ autopip            |          | Enable the browser to enter picture-in-picture m
 autoplay           | `false`  | Automatically start playback of the video. Note that this won’t work on some devices.
 background         | `false`  | Enable the player's background mode which hides the controls, autoplays and loops the video (available to  Plus, PRO, or Business members).
 byline             | `true`   | Show the byline on the video.
-color              | `00adef` | Specify the color of the video controls. Colors may be overridden by the embed settings of the video.
+color              | `00adef` | Specify the accent color of the video controls. Colors may be overridden by the embed settings of the video. Note that this field is deprecated and `color_two` should be used instead.
+color_one          | `000000` | Specify the primary color of the video controls. Colors may be overridden by the embed settings of the video.
+color_two          | `00adef` | Specify the accent color of the video controls. Colors may be overridden by the embed settings of the video. Note this value replaces `color`.
+color_three        | `ffffff` | Specify the text/icon color of the video controls. Colors may be overridden by the embed settings of the video.
+color_four         | `000000` | Specify the background color of the video controls. Colors may be overridden by the embed settings of the video.
 controls           | `true`   | This parameter will hide all elements in the player (play bar, sharing buttons, etc) for a chromeless experience. ⚠️Warning: When using this parameter, the play bar and UI will be hidden. To start playback for your viewers, you'll need to either enable autoplay or use our player SDK to start and control playback. (available to Plus, PRO, or Business members)
 dnt                | `false`  | Block the player from tracking any session data, including cookies.
 height             |          | The exact height of the video. Defaults to the height of the largest available version of the video.
@@ -763,10 +775,58 @@ player.getCurrentChapter().then(function(chapter) {
 
 ### getColor(): Promise&lt;string, Error&gt;
 
-Get the color for this player.
+Get the accent color for this player. Note that this is deprecated in place of `getColorTwo()`.
 
 ```js
 player.getColor().then(function(color) {
+    // color = the hex color of the player
+}).catch(function(error) {
+    // an error occurred
+});
+
+```
+### getColorOne(): Promise&lt;string, Error&gt;
+
+Get the primary color for this player.
+
+```js
+player.getColorOne().then(function(color) {
+    // color = the hex color of the player
+}).catch(function(error) {
+    // an error occurred
+});
+
+```
+### getColorTwo(): Promise&lt;string, Error&gt;
+
+Get the accent color for this player. Note that this updates the same color as `getColor()`.
+
+```js
+player.getColorTwo().then(function(color) {
+    // color = the hex color of the player
+}).catch(function(error) {
+    // an error occurred
+});
+
+```
+### getColorThree(): Promise&lt;string, Error&gt;
+
+Get the text/icon color for this player.
+
+```js
+player.getColorThree().then(function(color) {
+    // color = the hex color of the player
+}).catch(function(error) {
+    // an error occurred
+});
+
+```
+### getColorFour(): Promise&lt;string, Error&gt;
+
+Get the background color for this player.
+
+```js
+player.getColorFour().then(function(color) {
     // color = the hex color of the player
 }).catch(function(error) {
     // an error occurred
@@ -775,19 +835,123 @@ player.getColor().then(function(color) {
 
 ### setColor(color: string): Promise&lt;string, (ContrastError|TypeError|Error)&gt;
 
-Set the color of this player to a hex or rgb string. Setting the color may fail
+Set the accent color of this player to a hex or rgb string. Setting the color may fail
 if the owner of the video has set their embed preferences to force a specific
-color.
+color. Note that this setter is deprecated and should be replaced with `setColorTwo()`.
 
 ```js
 player.setColor('#00adef').then(function(color) {
     // color was successfully set
 }).catch(function(error) {
     switch (error.name) {
-        case 'ContrastError':
-            // the color was set, but the contrast is outside of the acceptable
-            // range
+
+        case 'TypeError':
+            // the string was not a valid hex or rgb color
             break;
+
+        case 'EmbedSettingsError':
+            // the owner of the video has chosen to use a specific color
+            break;
+
+        default:
+            // some other error occurred
+            break;
+    }
+});
+
+```
+### setColorOne(color: string): Promise&lt;string, (ContrastError|TypeError|Error)&gt;
+
+Set the primary color of this player to a hex or rgb string. Setting the color may fail
+if the owner of the video has set their embed preferences to force a specific
+color.
+
+```js
+player.setColorOne('#00adef').then(function(color) {
+    // color was successfully set
+}).catch(function(error) {
+    switch (error.name) {
+
+        case 'TypeError':
+            // the string was not a valid hex or rgb color
+            break;
+
+        case 'EmbedSettingsError':
+            // the owner of the video has chosen to use a specific color
+            break;
+
+        default:
+            // some other error occurred
+            break;
+    }
+});
+
+```
+### setColorTwo(color: string): Promise&lt;string, (ContrastError|TypeError|Error)&gt;
+
+Set the accent color of this player to a hex or rgb string. Setting the color may fail
+if the owner of the video has set their embed preferences to force a specific
+color. Note this updates the same color as `setColor()`.
+
+```js
+player.setColorTwo('#00adef').then(function(color) {
+    // color was successfully set
+}).catch(function(error) {
+    switch (error.name) {
+
+        case 'TypeError':
+            // the string was not a valid hex or rgb color
+            break;
+
+        case 'EmbedSettingsError':
+            // the owner of the video has chosen to use a specific color
+            break;
+
+        default:
+            // some other error occurred
+            break;
+    }
+});
+
+```
+### setColorThree(color: string): Promise&lt;string, (ContrastError|TypeError|Error)&gt;
+
+Set the text/icon color of this player to a hex or rgb string. Setting the color may fail
+if the owner of the video has set their embed preferences to force a specific
+color.
+
+```js
+player.setColorThree('#00adef').then(function(color) {
+    // color was successfully set
+}).catch(function(error) {
+    switch (error.name) {
+
+        case 'TypeError':
+            // the string was not a valid hex or rgb color
+            break;
+
+        case 'EmbedSettingsError':
+            // the owner of the video has chosen to use a specific color
+            break;
+
+        default:
+            // some other error occurred
+            break;
+    }
+});
+```
+
+### setColorFour(color: string): Promise&lt;string, (ContrastError|TypeError|Error)&gt;
+
+Set the background color of this player to a hex or rgb string. Setting the color may fail
+if the owner of the video has set their embed preferences to force a specific
+color.
+
+```js
+player.setColorFour('#00adef').then(function(color) {
+    // color was successfully set
+}).catch(function(error) {
+    switch (error.name) {
 
         case 'TypeError':
             // the string was not a valid hex or rgb color
