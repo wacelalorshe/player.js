@@ -18,7 +18,8 @@
     "preversion": "npm test",
     "version": "npm run build && git add -A dist",
     "postversion": "git branch -f latest master",
-    "push-release": "git push origin master latest && git push --tags"
+    "push-release": "git push origin master latest && git push --tags",
+    "prepublishOnly": "npm run build && git add -A dist"
   },
   "main": "dist/player.js",
   "module": "dist/player.es.js",
