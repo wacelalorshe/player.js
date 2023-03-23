@@ -15,6 +15,6 @@ jobs:
           # Setup .npmrc file to publish to npm
           registry-url: 'https://registry.npmjs.org'
       - run: yarn --frozen-lockfile
-      - run: yarn publish --new-version ${{ github.event.release.tag_name }} --access public
+      - run: yarn publish --new-version ${{ github.event.release.tag_name }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_VIMEO_PUBLISH_TOKEN }}

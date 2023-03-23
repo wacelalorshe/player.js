@@ -32,6 +32,10 @@
     "dist"
   ],
   "repository": "vimeo/player.js",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
   "bugs": "https://github.com/vimeo/player.js/issues",
   "keywords": [
     "vimeo",
