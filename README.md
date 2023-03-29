@@ -185,11 +185,13 @@ it will also import the Player constructor directly:
     + [getColor2](#getcolor2-promisestring-error)
     + [getColor3](#getcolor3-promisestring-error)
     + [getColor4](#getcolor4-promisestring-error)
+    + [getColors](#getcolors-promisestring-error)
     + [setColor](#setcolorcolor-string-promisestring-contrasterrortypeerrorerror)
     + [setColor1](#setcolor1color-string-promisestring-contrasterrortypeerrorerror)
     + [setColor2](#setcolor2color-string-promisestring-contrasterrortypeerrorerror)
     + [setColor3](#setcolor3color-string-promisestring-contrasterrortypeerrorerror)
     + [setColor4](#setcolor4color-string-promisestring-contrasterrortypeerrorerror)
+    + [setColors](#setcolorscolors-string-promisestring-contrasterrortypeerrorerror)
     + [addCuePoint](#addcuepointtime-number-data-object-promisestring-unsupportederrorrangeerrorerror)
     + [removeCuePoint](#removecuepointid-string-promisestring-unsupportederrorinvalidcuepointerror)
     + [getCuePoints](#getcuepoints-promisearray-unsupportederrorerror)
@@ -797,6 +799,19 @@ player.getColor4().then(function(color) {
 });
 ```
 
+### getColors(): Promise&lt;string[], Error&gt;
+
+Get all colors used for this player.
+The return value is an array of color1, color2, color3, and color4.
+
+```js
+player.getColors().then(function(colors) {
+    // colors = [color1, color2, color3, color4]
+}).catch(function(error) {
+    // an error occurred
+});
+```
+
 ### setColor(color: string): Promise&lt;string, (ContrastError|TypeError|Error)&gt;
 
 Set the accent color of this player to a hex or rgb string. Setting the color may fail
@@ -914,6 +929,34 @@ color.
 ```js
 player.setColor4('#00adef').then(function(color) {
     // color was successfully set
+}).catch(function(error) {
+    switch (error.name) {
+
+        case 'TypeError':
+            // the string was not a valid hex or rgb color
+            break;
+
+        case 'EmbedSettingsError':
+            // the owner of the video has chosen to use a specific color
+            break;
+
+        default:
+            // some other error occurred
+            break;
+    }
+});
+```
+
+### setColors(colors: string[]): Promise&lt;string[], (ContrastError|TypeError|Error)&gt;
+
+Set all colors of this player with an array of hex values. Setting the color may fail
+if the owner of the video has set their embed preferences to force a specific
+color.
+
+```js
+player.setColors(['abc', 'def', '123', '456']).then(function(color) {
+    // colors were successfully set
+    // Array order: [color1, color2, color3, color4]
 }).catch(function(error) {
     switch (error.name) {
 
