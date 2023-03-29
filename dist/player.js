@@ -2059,6 +2059,24 @@
         return this.get('color');
       }
       /**
+       * A promise to get all colors for the player in an array.
+       *
+       * @promise GetColorsPromise
+       * @fulfill {string[]} The hex colors of the player.
+       */
+
+      /**
+       * Get all the colors for this player in an array: [color1, color2, color3, color4]
+       *
+       * @return {GetColorPromise}
+       */
+
+    }, {
+      key: "getColors",
+      value: function getColors() {
+        return npo_src.all([this.getColor1(), this.getColor2(), this.getColor3(), this.getColor4()]);
+      }
+      /**
        * A promise to get the primary color of the player.
        *
        * @promise GetColor1Promise
@@ -2156,6 +2174,43 @@
       key: "setColor",
       value: function setColor(color) {
         return this.set('color', color);
+      }
+      /**
+       * A promise to set all colors for the player.
+       *
+       * @promise SetColorsPromise
+       * @fulfill {string[]} The colors were successfully set.
+       * @reject {TypeError} The string was not a valid hex or rgb color.
+       * @reject {ContrastError} The color was set, but the contrast is
+       *         outside of the acceptable range.
+       * @reject {EmbedSettingsError} The owner of the player has chosen to
+       *         use a specific color.
+       */
+
+      /**
+       * Set the colors of this player to a hex or rgb string. Setting the
+       * color may fail if the owner of the video has set their embed
+       * preferences to force a specific color.
+       * The colors should be passed in as an array: [color1, color2, color3, color4].
+       * If a color should not be set, the index in the array can be left as null.
+       *
+       * @param {string[]} colors Array of the hex or rgb color strings to set.
+       * @return {SetColorsPromise}
+       */
+
+    }, {
+      key: "setColors",
+      value: function setColors() {
+        var colors = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+
+        var nullPromise = function nullPromise() {
+          return new npo_src(function (resolve) {
+            return resolve(null);
+          });
+        };
+
+        var colorsPromises = [colors[0] ? this.setColor1(colors[0]) : nullPromise(), colors[1] ? this.setColor2(colors[1]) : nullPromise(), colors[2] ? this.setColor3(colors[2]) : nullPromise(), colors[3] ? this.setColor4(colors[3]) : nullPromise()];
+        return npo_src.all(colorsPromises);
       }
       /**
        * A promise to set the primary color of the player.
