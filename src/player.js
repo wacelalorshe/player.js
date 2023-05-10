@@ -742,13 +742,13 @@ class Player {
     }
 
     /**
-     * A promise to get the color of the player.
+     * A promise to get the accent color of the player.
      *
      * @promise GetColorPromise
      * @fulfill {string} The hex color of the player.
      */
     /**
-     * Get the color for this player.
+     * Get the accent color for this player. Note this is deprecated in place of `getColorTwo`.
      *
      * @return {GetColorPromise}
      */
@@ -757,7 +757,27 @@ class Player {
     }
 
     /**
-     * A promise to set the color of the player.
+     * A promise to get all colors for the player in an array.
+     *
+     * @promise GetColorsPromise
+     * @fulfill {string[]} The hex colors of the player.
+     */
+    /**
+     * Get all the colors for this player in an array: [colorOne, colorTwo, colorThree, colorFour]
+     *
+     * @return {GetColorPromise}
+     */
+    getColors() {
+        return Promise.all([
+            this.get('colorOne'),
+            this.get('colorTwo'),
+            this.get('colorThree'),
+            this.get('colorFour')
+        ]);
+    }
+
+    /**
+     * A promise to set the accent color of the player.
      *
      * @promise SetColorPromise
      * @fulfill {string} The color was successfully set.
@@ -768,15 +788,48 @@ class Player {
      *         use a specific color.
      */
     /**
-     * Set the color of this player to a hex or rgb string. Setting the
+     * Set the accent color of this player to a hex or rgb string. Setting the
      * color may fail if the owner of the video has set their embed
      * preferences to force a specific color.
+     * Note this is deprecated in place of `setColorTwo`.
      *
      * @param {string} color The hex or rgb color string to set.
      * @return {SetColorPromise}
      */
     setColor(color) {
         return this.set('color', color);
+    }
+
+    /**
+     * A promise to set all colors for the player.
+     *
+     * @promise SetColorsPromise
+     * @fulfill {string[]} The colors were successfully set.
+     * @reject {TypeError} The string was not a valid hex or rgb color.
+     * @reject {ContrastError} The color was set, but the contrast is
+     *         outside of the acceptable range.
+     * @reject {EmbedSettingsError} The owner of the player has chosen to
+     *         use a specific color.
+     */
+    /**
+     * Set the colors of this player to a hex or rgb string. Setting the
+     * color may fail if the owner of the video has set their embed
+     * preferences to force a specific color.
+     * The colors should be passed in as an array: [colorOne, colorTwo, colorThree, colorFour].
+     * If a color should not be set, the index in the array can be left as null.
+     *
+     * @param {string[]} colors Array of the hex or rgb color strings to set.
+     * @return {SetColorsPromise}
+     */
+    setColors(colors = []) {
+        const nullPromise = new Promise((resolve) => resolve(null));
+        const colorPromises = [
+            colors[0] ? this.set('colorOne', colors[0]) : nullPromise,
+            colors[1] ? this.set('colorTwo', colors[1]) : nullPromise,
+            colors[2] ? this.set('colorThree', colors[2]) : nullPromise,
+            colors[3] ? this.set('colorFour', colors[3]) : nullPromise
+        ];
+        return Promise.all(colorPromises);
     }
 
     /**

@@ -138,9 +138,9 @@ function createCommonjsModule(fn, module) {
 }
 
 /*!
- * weakmap-polyfill v2.0.4 - ECMAScript6 WeakMap polyfill
+ * weakmap-polyfill v2.0.1 - ECMAScript6 WeakMap polyfill
  * https://github.com/polygonplanet/weakmap-polyfill
- * Copyright (c) 2015-2021 polygonplanet <polygon.planet.aqua@gmail.com>
+ * Copyright (c) 2015-2020 Polygon Planet <polygon.planet.aqua@gmail.com>
  * @license MIT
  */
 (function (self) {
@@ -151,17 +151,8 @@ function createCommonjsModule(fn, module) {
 
   var hasOwnProperty = Object.prototype.hasOwnProperty;
 
-  var hasDefine = Object.defineProperty && function () {
-    try {
-      // Avoid IE8's broken Object.defineProperty
-      return Object.defineProperty({}, 'x', {
-        value: 1
-      }).x === 1;
-    } catch (e) {}
-  }();
-
   var defineProperty = function (object, name, value) {
-    if (hasDefine) {
+    if (Object.defineProperty) {
       Object.defineProperty(object, name, {
         configurable: true,
         writable: true,
@@ -276,7 +267,7 @@ function createCommonjsModule(fn, module) {
   function isObject(x) {
     return Object(x) === x;
   }
-})(typeof globalThis !== 'undefined' ? globalThis : typeof self !== 'undefined' ? self : typeof window !== 'undefined' ? window : typeof commonjsGlobal !== 'undefined' ? commonjsGlobal : commonjsGlobal);
+})(typeof self !== 'undefined' ? self : typeof window !== 'undefined' ? window : typeof commonjsGlobal !== 'undefined' ? commonjsGlobal : commonjsGlobal);
 
 var npo_src = createCommonjsModule(function (module) {
 /*! Native Promise Only
@@ -287,7 +278,7 @@ var npo_src = createCommonjsModule(function (module) {
   // special form of UMD for polyfilling across evironments
   context[name] = context[name] || definition();
 
-  if ( module.exports) {
+  if (module.exports) {
     module.exports = context[name];
   }
 })("Promise", typeof commonjsGlobal != "undefined" ? commonjsGlobal : commonjsGlobal, function DEF() {
@@ -839,7 +830,7 @@ function processData(player, data) {
 /**
  * @module lib/embed
  */
-var oEmbedParameters = ['autopause', 'autoplay', 'background', 'byline', 'color', 'controls', 'dnt', 'height', 'id', 'interactive_params', 'keyboard', 'loop', 'maxheight', 'maxwidth', 'muted', 'playsinline', 'portrait', 'responsive', 'speed', 'texttrack', 'title', 'transparent', 'url', 'width'];
+var oEmbedParameters = ['autopause', 'autoplay', 'background', 'byline', 'color', 'colors', 'controls', 'dnt', 'height', 'id', 'interactive_params', 'keyboard', 'loop', 'maxheight', 'maxwidth', 'muted', 'playsinline', 'portrait', 'responsive', 'speed', 'texttrack', 'title', 'transparent', 'url', 'width'];
 /**
  * Get the 'data-vimeo'-prefixed attributes from an element as an object.
  *
@@ -2063,14 +2054,14 @@ var Player = /*#__PURE__*/function () {
       return this.get('currentChapter');
     }
     /**
-     * A promise to get the color of the player.
+     * A promise to get the accent color of the player.
      *
      * @promise GetColorPromise
      * @fulfill {string} The hex color of the player.
      */
 
     /**
-     * Get the color for this player.
+     * Get the accent color for this player. Note this is deprecated in place of `getColorTwo`.
      *
      * @return {GetColorPromise}
      */
@@ -2081,7 +2072,25 @@ var Player = /*#__PURE__*/function () {
       return this.get('color');
     }
     /**
-     * A promise to set the color of the player.
+     * A promise to get all colors for the player in an array.
+     *
+     * @promise GetColorsPromise
+     * @fulfill {string[]} The hex colors of the player.
+     */
+
+    /**
+     * Get all the colors for this player in an array: [colorOne, colorTwo, colorThree, colorFour]
+     *
+     * @return {GetColorPromise}
+     */
+
+  }, {
+    key: "getColors",
+    value: function getColors() {
+      return npo_src.all([this.get('colorOne'), this.get('colorTwo'), this.get('colorThree'), this.get('colorFour')]);
+    }
+    /**
+     * A promise to set the accent color of the player.
      *
      * @promise SetColorPromise
      * @fulfill {string} The color was successfully set.
@@ -2093,9 +2102,10 @@ var Player = /*#__PURE__*/function () {
      */
 
     /**
-     * Set the color of this player to a hex or rgb string. Setting the
+     * Set the accent color of this player to a hex or rgb string. Setting the
      * color may fail if the owner of the video has set their embed
      * preferences to force a specific color.
+     * Note this is deprecated in place of `setColorTwo`.
      *
      * @param {string} color The hex or rgb color string to set.
      * @return {SetColorPromise}
@@ -2105,6 +2115,39 @@ var Player = /*#__PURE__*/function () {
     key: "setColor",
     value: function setColor(color) {
       return this.set('color', color);
+    }
+    /**
+     * A promise to set all colors for the player.
+     *
+     * @promise SetColorsPromise
+     * @fulfill {string[]} The colors were successfully set.
+     * @reject {TypeError} The string was not a valid hex or rgb color.
+     * @reject {ContrastError} The color was set, but the contrast is
+     *         outside of the acceptable range.
+     * @reject {EmbedSettingsError} The owner of the player has chosen to
+     *         use a specific color.
+     */
+
+    /**
+     * Set the colors of this player to a hex or rgb string. Setting the
+     * color may fail if the owner of the video has set their embed
+     * preferences to force a specific color.
+     * The colors should be passed in as an array: [colorOne, colorTwo, colorThree, colorFour].
+     * If a color should not be set, the index in the array can be left as null.
+     *
+     * @param {string[]} colors Array of the hex or rgb color strings to set.
+     * @return {SetColorsPromise}
+     */
+
+  }, {
+    key: "setColors",
+    value: function setColors() {
+      var colors = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+      var nullPromise = new npo_src(function (resolve) {
+        return resolve(null);
+      });
+      var colorPromises = [colors[0] ? this.set('colorOne', colors[0]) : nullPromise, colors[1] ? this.set('colorTwo', colors[1]) : nullPromise, colors[2] ? this.set('colorThree', colors[2]) : nullPromise, colors[3] ? this.set('colorFour', colors[3]) : nullPromise];
+      return npo_src.all(colorPromises);
     }
     /**
      * A representation of a cue point.
