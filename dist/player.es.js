@@ -1,4 +1,4 @@
-/*! @vimeo/player v2.19.0 | (c) 2023 Vimeo | MIT License | https://github.com/vimeo/player.js */
+/*! @vimeo/player v2.20.0 | (c) 2023 Vimeo | MIT License | https://github.com/vimeo/player.js */
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 function createCommonjsModule(fn, module) {
