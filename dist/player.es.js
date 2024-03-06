@@ -1,4 +1,4 @@
-/*! @vimeo/player v2.21.0 | (c) 2024 Vimeo | MIT License | https://github.com/vimeo/player.js */
+/*! @vimeo/player v2.22.0 | (c) 2024 Vimeo | MIT License | https://github.com/vimeo/player.js */
 function ownKeys(object, enumerableOnly) {
   var keys = Object.keys(object);
   if (Object.getOwnPropertySymbols) {
