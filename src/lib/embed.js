@@ -3,7 +3,7 @@
  */
 
 import Player from '../player';
-import { isVimeoUrl, isVimeoEmbed, getVimeoUrl } from './functions';
+import { isVimeoUrl, isVimeoEmbed, getVimeoUrl, getOembedDomain } from './functions';
 import { parseMessageData } from './postmessage';
 
 const oEmbedParameters = [
@@ -108,7 +108,8 @@ export function getOEmbedData(videoUrl, params = {}, element) {
             throw new TypeError(`“${videoUrl}” is not a vimeo.com url.`);
         }
 
-        let url = `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(videoUrl)}`;
+        const domain = getOembedDomain(videoUrl);
+        let url = `https://${domain}/api/oembed.json?url=${encodeURIComponent(videoUrl)}`;
 
         for (const param in params) {
             if (params.hasOwnProperty(param)) {
