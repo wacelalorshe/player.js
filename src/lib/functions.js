@@ -58,7 +58,7 @@ export function isInteger(value) {
  * @return {boolean}
  */
 export function isVimeoUrl(url) {
-    return (/^(https?:)?\/\/((player|www)\.)?vimeo\.com(?=$|\/)/).test(url);
+    return (/^(https?:)?\/\/((((player|www)\.)?vimeo\.com)|((player\.)?[a-zA-Z0-9-]+\.videoji\.hk))(?=$|\/)/).test(url);
 }
 
 /**
@@ -68,8 +68,19 @@ export function isVimeoUrl(url) {
  * @return {boolean}
  */
 export function isVimeoEmbed(url) {
-    const expr = /^https:\/\/player\.vimeo\.com\/video\/\d+/;
+    const expr = /^https:\/\/player\.((vimeo\.com)|([a-zA-Z0-9-]+\.videoji\.hk))\/video\/\d+/;
     return expr.test(url);
+}
+
+export function getOembedDomain(url) {
+    const match = (url || '').match(/^(?:https?:)?(?:\/\/)?([^/?]+)/);
+    const domain = ((match && match[1]) || '').replace('player.', '');
+
+    if (domain.endsWith('.videoji.hk')) {
+        return domain;
+    }
+
+    return 'vimeo.com';
 }
 
 /**
