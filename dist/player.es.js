@@ -1,4 +1,4 @@
-/*! @vimeo/player v2.23.0 | (c) 2024 Vimeo | MIT License | https://github.com/vimeo/player.js */
+/*! @vimeo/player v2.23.1 | (c) 2024 Vimeo | MIT License | https://github.com/vimeo/player.js */
 function ownKeys(object, enumerableOnly) {
   var keys = Object.keys(object);
   if (Object.getOwnPropertySymbols) {
@@ -569,7 +569,7 @@ function isInteger(value) {
  * @return {boolean}
  */
 function isVimeoUrl(url) {
-  return /^(https?:)?\/\/((((player|www)\.)?vimeo\.com)|((player\.)?[a-zA-Z0-9-]+\.videoji\.hk))(?=$|\/)/.test(url);
+  return /^(https?:)?\/\/((((player|www)\.)?vimeo\.com)|((player\.)?[a-zA-Z0-9-]+\.(videoji\.(hk|cn)|vimeo\.work)))(?=$|\/)/.test(url);
 }
 
 /**
@@ -579,14 +579,18 @@ function isVimeoUrl(url) {
  * @return {boolean}
  */
 function isVimeoEmbed(url) {
-  var expr = /^https:\/\/player\.((vimeo\.com)|([a-zA-Z0-9-]+\.videoji\.hk))\/video\/\d+/;
+  var expr = /^https:\/\/player\.((vimeo\.com)|([a-zA-Z0-9-]+\.(videoji\.(hk|cn)|vimeo\.work)))\/video\/\d+/;
   return expr.test(url);
 }
 function getOembedDomain(url) {
   var match = (url || '').match(/^(?:https?:)?(?:\/\/)?([^/?]+)/);
   var domain = (match && match[1] || '').replace('player.', '');
-  if (domain.endsWith('.videoji.hk')) {
-    return domain;
+  var customDomains = ['.videoji.hk', '.vimeo.work', '.videoji.cn'];
+  for (var _i = 0, _customDomains = customDomains; _i < _customDomains.length; _i++) {
+    var customDomain = _customDomains[_i];
+    if (domain.endsWith(customDomain)) {
+      return domain;
+    }
   }
   return 'vimeo.com';
 }

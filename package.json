@@ -1,6 +1,6 @@
 {
   "name": "@vimeo/player",
-  "version": "2.23.0",
+  "version": "2.23.1",
   "description": "Interact with and control an embedded Vimeo Player.",
   "license": "MIT",
   "author": "Vimeo <https://vimeo.com>",
@@ -131,5 +131,8 @@
     "last 2 versions",
     "Firefox ESR",
     "not ie < 11"
-  ]
+  ],
+  "volta": {
+    "node": "16.16.0"
+  }
 }
